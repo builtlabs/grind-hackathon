@@ -1,5 +1,5 @@
-import { GET_GAME } from '@/lib/graph';
-import { type GetGameQuery } from '@/graph/graphql';
+import { GET_BLOCK_NUMBER, GET_GAME } from '@/lib/graph';
+import { GetBlockNumberQuery, type GetGameQuery } from '@/graph/graphql';
 import { type Response, fetchGraphQL } from './graph';
 
 export async function getGame(id: `0x${string}-${number}`): Promise<Response<GetGameQuery>> {
@@ -8,5 +8,11 @@ export async function getGame(id: `0x${string}-${number}`): Promise<Response<Get
     variables: {
       id: id.toLowerCase(),
     },
+  });
+}
+
+export async function getBlockNumber(): Promise<Response<GetBlockNumberQuery>> {
+  return fetchGraphQL({
+    document: GET_BLOCK_NUMBER,
   });
 }

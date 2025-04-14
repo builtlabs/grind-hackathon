@@ -1,8 +1,6 @@
 # TODO
 
 ## Infrastructure
-- Server side graphql query
-  - Show a site status, to show if the graph is out of sync
 - Block tick UI
   - Refetch the block from an api route
   - sync the refetch interval with the server revalidation period

@@ -6,6 +6,7 @@ import { ThemeSwitch } from '../theme-switch';
 import { MobileNavLink, NavLine, NavLink } from './nav-link';
 import Image from 'next/image';
 import { AuthButton } from '../auth/button';
+import { SystemStatus } from '../system-status';
 
 const Links: React.FC<{
   className?: string;
@@ -76,7 +77,10 @@ export const Header: React.FC = () => {
             <div className="flex grow flex-col p-4">
               <MobileNavLink href="/">Home</MobileNavLink>
 
-              <Links className="mt-auto ml-auto" />
+              <div className="mt-auto flex items-center gap-2">
+                <SystemStatus />
+                <Links className="ml-auto" />
+              </div>
             </div>
           </SheetContent>
         </Sheet>
@@ -91,7 +95,10 @@ export const Header: React.FC = () => {
         <NavLine />
       </nav>
 
-      <AuthButton />
+      <div className="flex items-center gap-2 md:gap-4">
+        <SystemStatus className="hidden md:flex" />
+        <AuthButton />
+      </div>
     </header>
   );
 };

@@ -45,3 +45,13 @@ export const GET_GAME = graphql(`
     }
   }
 `);
+
+export const GET_BLOCK_NUMBER = graphql(`
+  query GetBlockNumber {
+    _meta {
+      block {
+        number
+      }
+    }
+  }
+`);

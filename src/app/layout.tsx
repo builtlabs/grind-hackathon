@@ -9,6 +9,7 @@ import PrivyProvider from '@/components/providers/privy';
 import { Header } from '@/components/core/header';
 import { Footer } from '@/components/core/footer';
 import { ThemeSwitch } from '@/components/theme-switch';
+import { WagmiProvider } from '@/components/providers/wagmi';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -44,16 +45,18 @@ export default async function RootLayout({
           disableTransitionOnChange
           nonce={nonce}
         >
-          <QueryProvider nonce={nonce}>
-            <PrivyProvider>
-              <div className="flex min-h-screen flex-col">
-                <Header />
-                {children}
-              </div>
-              <Footer />
-              <ThemeSwitch className="fixed right-10 bottom-10 z-50 hidden xl:flex" />
-            </PrivyProvider>
-          </QueryProvider>
+          <WagmiProvider>
+            <QueryProvider nonce={nonce}>
+              <PrivyProvider>
+                <div className="flex min-h-screen flex-col">
+                  <Header />
+                  {children}
+                </div>
+                <Footer />
+                <ThemeSwitch className="fixed right-10 bottom-10 z-50 hidden xl:flex" />
+              </PrivyProvider>
+            </QueryProvider>
+          </WagmiProvider>
         </ThemeProvider>
       </body>
     </html>
