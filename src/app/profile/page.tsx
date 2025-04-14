@@ -11,15 +11,13 @@ export default async function Page() {
   }
 
   const account = privyUser.linkedAccounts.find(
-    account => account.type === 'cross_app' && account.providerApp.id === ABSTRACT_APP_ID,
+    account => account.type === 'cross_app' && account.providerApp.id === ABSTRACT_APP_ID
   ) as CrossAppAccountWithMetadata;
 
   return (
     <main className="container flex w-full grow items-center justify-center">
       PROFILE
-      <span className="text-muted-foreground text-sm">
-        {account.embeddedWallets[0].address}
-      </span>
+      <span className="text-muted-foreground text-sm">{account.embeddedWallets[0].address}</span>
     </main>
   );
 }

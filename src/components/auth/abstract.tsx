@@ -6,13 +6,12 @@ import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 import { ABSTRACT_APP_ID } from '@/lib/abstract';
 
-
 export const AbstractLogin: React.FC<Omit<ComponentProps<typeof Button>, 'children'>> = ({
   className,
   ...props
 }) => {
   const { ready, authenticated } = usePrivy();
-  const {loginWithCrossAppAccount} = useCrossAppAccounts();
+  const { loginWithCrossAppAccount } = useCrossAppAccounts();
 
   function handleLogin() {
     loginWithCrossAppAccount({ appId: ABSTRACT_APP_ID });

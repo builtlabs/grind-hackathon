@@ -51,6 +51,4 @@ function defineAppChain(chain: Chain): Chain {
 
 export const abstractTestnet = defineAppChain(defineAlchemyChain(absT, Network.ABSTRACT_TESTNET));
 
-export const chains = [
-  abstractTestnet,
-] as const;
+export const chains = [abstractTestnet] as const;
