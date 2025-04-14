@@ -3,7 +3,6 @@
 ## Infrastructure
 - Server side graphql query
   - Show a site status, to show if the graph is out of sync
-  - Copy a Query example from RPS to make sure the types are working correctly
 - Block tick UI
   - Refetch the block from an api route
   - sync the refetch interval with the server revalidation period

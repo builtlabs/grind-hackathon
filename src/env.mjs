@@ -6,6 +6,7 @@ const env = createEnv({
     NODE_ENV: z.enum(['development', 'test', 'production']),
     PRIVY_APP_SECRET: z.string(),
     ALCHEMY_API_KEY: z.string(),
+    ALCHEMY_GRAPH_URL: z.string().url(),
     VERCEL_AUTOMATION_BYPASS_SECRET: z.string().optional(),
   },
   client: {
