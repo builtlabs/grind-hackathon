@@ -1,7 +1,15 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
+
+/* Fix Hover bug: https://github.com/tailwindlabs/tailwindcss/issues/16531 */
+@custom-variant hover {
+  &:hover {
+    @slot;
+  }
+}
 
 @theme inline {
   --color-background: var(--background);
@@ -119,4 +127,17 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+@utility scrollbar-hidden {
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: 2rem;
 }
