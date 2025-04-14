@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { fetcher } from '@/lib/fetch';
 import { GetBlockNumberQuery } from '@/graph/graphql';
+import { usePrivy } from '@privy-io/react-auth';
 
 type Status = 'out-of-sync' | 'normal';
 
@@ -32,6 +33,7 @@ interface SystemStatusProps {
 }
 
 export const SystemStatus: React.FC<SystemStatusProps> = ({ className }) => {
+  const { ready, authenticated } = usePrivy();
   const [status, setStatus] = useState<Status>('normal');
 
   const { data: graph, isFetching: isFetchingGraph } = useQuery({
@@ -42,6 +44,7 @@ export const SystemStatus: React.FC<SystemStatusProps> = ({ className }) => {
       const blockNumber = data._meta?.block.number;
       return blockNumber ? BigInt(blockNumber) : null;
     },
+    enabled: ready && authenticated,
   });
 
   // TODO: use the api route we are going to add?
@@ -49,6 +52,7 @@ export const SystemStatus: React.FC<SystemStatusProps> = ({ className }) => {
     watch: false,
     query: {
       refetchInterval: 10000,
+      enabled: ready && authenticated,
     },
   });
 
@@ -66,6 +70,10 @@ export const SystemStatus: React.FC<SystemStatusProps> = ({ className }) => {
     setStatus(state);
   }, [graph, chain, isFetchingGraph, isFetchingChain]);
 
+  if (!ready || !authenticated) {
+    return null;
+  }
+
   return (
     <TooltipProvider>
       <Tooltip>
@@ -78,7 +86,7 @@ export const SystemStatus: React.FC<SystemStatusProps> = ({ className }) => {
         >
           <SquareActivity className="size-6" />
         </TooltipTrigger>
-        <TooltipContent side="bottom" className="font-chakra-petch">
+        <TooltipContent side="bottom">
           {status === 'normal' ? <span>All systems normal</span> : <span>System out of sync</span>}
         </TooltipContent>
       </Tooltip>
