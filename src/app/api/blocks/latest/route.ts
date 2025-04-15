@@ -1,15 +1,13 @@
 import { NextResponse } from 'next/server';
 import { unstable_cache as cache } from 'next/cache';
-import { createPublicClient } from '@/lib/viem';
-import { abstractTestnet } from 'viem/chains';
 import { Block, CachedResponse } from '../types';
+import { publicClient } from '@/server/viem';
 
 // solve the cache stampede or thundering herd problem
 let pendingFetch: Promise<CachedResponse<Block>> | null = null;
 
 async function fetchBlock(): Promise<CachedResponse<Block>> {
   console.log('Fetching latest block...');
-  const publicClient = createPublicClient(abstractTestnet);
   const block = await publicClient.getBlock();
 
   const timestamp = Date.now();
