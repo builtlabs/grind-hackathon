@@ -1,10 +1,6 @@
 # TODO
 
 ## Infrastructure
-- Block tick UI
-  - Refetch the block from an api route
-  - sync the refetch interval with the server revalidation period
-  - Show the passing blocks with basic block info
 - Test out some math using jest unit tests
   - Determine the probability the game reaches the end (50 blocks etc)
   - Determine the probability of a block being a crash (end game)
