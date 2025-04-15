@@ -1,6 +1,15 @@
 # TODO
 
 ## Infrastructure
+- Block Number
+  - Websocket with a public alchemy api key thats only used for ws
+  - When it changes we will call `api/game/:blocknumber` which calls view functions
+    - cached forever
+    - Pass the block number to viem
+- Sending Transactions
+  - Wait for it to send
+  - Fetch new game state
+
 - Test out some math using jest unit tests
   - Determine the probability the game reaches the end (50 blocks etc)
   - Determine the probability of a block being a crash (end game)
