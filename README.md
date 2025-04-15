@@ -2,7 +2,6 @@
 
 ## Infrastructure
 - Block Number
-  - Websocket with a public alchemy api key thats only used for ws
   - When it changes we will call `api/game/:blocknumber` which calls view functions
     - cached forever
     - Pass the block number to viem

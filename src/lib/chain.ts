@@ -18,6 +18,7 @@ function defineAlchemyChain(chain: Chain, network: Network) {
       ...chain.rpcUrls,
       alchemy: {
         http: [`https://${network}.g.alchemy.com/v2`],
+        webSocket: [`wss://${network}.g.alchemy.com/v2`],
       },
     },
   };
@@ -36,7 +37,7 @@ export function chainIconUrl(chain: Chain) {
   return `https://icons.llamao.fi/icons/chains/rsz_${iconName(chain)}`;
 }
 
-function defineAppChain(chain: Chain): Chain {
+function defineAppChain(chain: ReturnType<typeof defineAlchemyChain>) {
   return {
     ...chain,
     rpcUrls: {
@@ -44,6 +45,7 @@ function defineAppChain(chain: Chain): Chain {
       alchemy: chain.rpcUrls.alchemy,
       app: {
         http: [rpcUrl(chain.id)],
+        webSocket: [`${chain.rpcUrls.alchemy.webSocket[0]}/${env.NEXT_PUBLIC_ALCHEMY_API_KEY}`],
       },
     },
   };
