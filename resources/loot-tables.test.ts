@@ -105,6 +105,8 @@ Object.entries(curves).forEach(([key, value]) => {
 
           expect(minSurvived).toBeGreaterThanOrEqual(0);
           expect(maxSurvived).toBeLessThanOrEqual(maxBlock);
+          expect(completion).toBeGreaterThan(0);
+          expect(completion).toBeLessThan(totalSimulations);
           console.log(`[${source}] ${key} - Min: ${minSurvived}, Max: ${maxSurvived}, Avg: ${avgSurvived}, Completion: ${completion}/${totalSimulations} (${((completion / totalSimulations) * 100).toFixed(2)}%)`);
         });
         
@@ -138,12 +140,46 @@ Object.entries(curves).forEach(([key, value]) => {
             }
           }
           if (warnings.length > 0) {
-            console.warn(`[${source}] ${key} - Warnings:`);
-            warnings.forEach((warning) => console.warn(warning));
+            // console.warn(`[${source}] ${key} - Warnings:`);
+            // warnings.forEach((warning) => console.warn(warning));
           }
 
           expect(errors).toHaveLength(0);
 
+        });
+
+        it("should have 97% survival rate at 1x", () => {
+          const survived = [];
+          const totalSimulations = Math.min(blocks.length - maxBlock, 100000);
+          for (let i = 0; i < totalSimulations; i++) {
+            const rngs = blocks.slice(i, i + maxBlock).map((block) => block.rng);
+            const result = simulateGame(rngs, thresholds);
+            survived.push(result);
+          }
+
+          const target = multipliers.findIndex((m) => m >= 1e6);
+          const survivalRate = survived.filter((s) => s >= target).length / totalSimulations;
+          console.log(`[${source}] ${key} - Survival rate at ${Number(multipliers[target]) / 1e6}x: ${(survivalRate * 100).toFixed(2)}%`);
+          expect(survivalRate).toBeGreaterThanOrEqual(0.97);
+        });
+
+        it("should maintain the house edge", () => {
+          const survived: number[] = [];
+          const totalSimulations = Math.min(blocks.length - maxBlock, 100000);
+          for (let i = 0; i < totalSimulations; i++) {
+            const rngs = blocks.slice(i, i + maxBlock).map((block) => block.rng);
+            const result = simulateGame(rngs, thresholds);
+            survived.push(result);
+          }
+
+          const blockEdges = Array.from({ length: maxBlock }, (_, index) => {
+            const survivedCount = survived.filter((s) => s >= index).length;
+            return survivedCount / totalSimulations * Number(multipliers[index]) / 1e6;
+          });
+
+          for (let i = 0; i < blockEdges.length - 1; i++) {
+            expect(blockEdges[i]).toBeLessThanOrEqual(1);
+          }
         });
       });
     });
