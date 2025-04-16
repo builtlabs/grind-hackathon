@@ -73,7 +73,7 @@ const curves = directories.reduce((acc, dir) => {
 
 const rngPath = path.join(__dirname, "./block-data.json");
 const gameBlocks = loadBlockRNG(rngPath);
-const fakeBlocks = generateFakeBlocks(100000);
+const fakeBlocks = generateFakeBlocks(1000000);
 
 const data = {
   CHAIN: gameBlocks,
@@ -88,10 +88,10 @@ Object.entries(curves).forEach(([key, value]) => {
 
     Object.entries(data).forEach(([source, blocks]) => {
       describe(`Using ${source} block data`, () => {
-        const totalSimulations = blocks.length - maxBlock;
         it("should simulate games", () => {
           const survived = [];
 
+          const totalSimulations = Math.min(blocks.length - maxBlock, 100000);
           for (let i = 0; i < totalSimulations; i++) {
             const rngs = blocks.slice(i, i + maxBlock).map((block) => block.rng);
             const result = simulateGame(rngs, thresholds);
@@ -109,15 +109,20 @@ Object.entries(curves).forEach(([key, value]) => {
         });
         
         it("should never exceed 0.97x EV on any block", () => {
+          const warnings = [];
           const errors =[];
 
           for (let blockIndex = 0; blockIndex < maxBlock; blockIndex++) {
             let survived = 0;
 
-            for (let i = 0; i < totalSimulations; i++) {
+            let totalSimulations = 0;
+            let i = 0;
+            while (i < blocks.length) {
               const rngs = blocks.slice(i, i + maxBlock).map((block) => block.rng);
               const result = simulateGame(rngs, thresholds);
               if (result > blockIndex) survived++;
+              i += result + 1;
+              totalSimulations++;
             }
 
             const survivalRate = survived / totalSimulations;
@@ -125,14 +130,20 @@ Object.entries(curves).forEach(([key, value]) => {
 
             if (ev > 0.97) {
               // console.warn(`⚠️ Block ${blockIndex + 1} has EV ${ev.toFixed(4)} > 0.97x`);
+              warnings.push(`Block ${blockIndex + 1} has EV ${ev.toFixed(4)} > 0.97x`);
             }
 
             if (ev > 1.0) {
               errors.push(`Block ${blockIndex + 1} has EV ${ev.toFixed(4)} > 1.0x`);
             }
           }
+          if (warnings.length > 0) {
+            console.warn(`[${source}] ${key} - Warnings:`);
+            warnings.forEach((warning) => console.warn(warning));
+          }
 
           expect(errors).toHaveLength(0);
+
         });
       });
     });
