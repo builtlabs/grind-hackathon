@@ -26,12 +26,20 @@ function loadBlockRNG(filePath: string): BlockRNG[] {
   }));
 }
 
-function randomRNG(): bigint {
-  const randomValue = crypto.randomBytes(16).toString("hex");
-  const randomBigInt = BigInt("0x" + randomValue);
-  const rng = randomBigInt % BigInt(1e18);
-  return rng;
-};
+function generateFakeBlocks(numBlocks: number): BlockRNG[] {
+  const blocks: BlockRNG[] = [];
+
+  for (let i = 0; i < numBlocks; i++) {
+    const blockNumber = i + 1;
+    const randomValue = crypto.randomBytes(32).toString("hex");
+    const hash = `0x${randomValue}`;
+    const randomBigInt = BigInt("0x" + randomValue);
+    const rng = randomBigInt % BigInt(1e18);
+    blocks.push({ blockNumber, hash, rng });
+  }
+
+  return blocks;
+}
 
 function simulateGame(rngs: bigint[], thresholds: bigint[]): number {
   let crashed = false;
@@ -59,6 +67,12 @@ const curves = {
 
 const rngPath = path.join(__dirname, "./block-data.json");
 const gameBlocks = loadBlockRNG(rngPath);
+const fakeBlocks = generateFakeBlocks(100000);
+
+const data = {
+  CHAIN: gameBlocks,
+  RANDOM: fakeBlocks,
+}
 
 Object.entries(curves).forEach(([key, value]) => {
   describe(`Game Simulation — ${key}`, () => {
@@ -67,102 +81,55 @@ Object.entries(curves).forEach(([key, value]) => {
     const thresholds = loadCsv(thresholdPath);
     const multipliers = loadCsv(multipliersPath);
     const maxBlock = thresholds.length;
-    const totalSimulations = gameBlocks.length - maxBlock;
 
-    describe("Using real on-chain block data", () => {
-      it("should simulate games", () => {
-        const survived = [];
-
-        for (let i = 0; i < totalSimulations; i++) {
-          const rngs = gameBlocks.slice(i, i + maxBlock).map((block) => block.rng);
-          const result = simulateGame(rngs, thresholds);
-          survived.push(result);
-        }
-
-        const minSurvived = Math.min(...survived);
-        const maxSurvived = Math.max(...survived);
-        const avgSurvived = survived.reduce((acc, val) => acc + val, 0) / survived.length;
-        const completion = survived.filter((s) => s === maxBlock).length;
-
-        expect(minSurvived).toBeGreaterThanOrEqual(0);
-        expect(maxSurvived).toBeLessThanOrEqual(maxBlock);
-        console.log(`[CHAIN] ${key} - Min: ${minSurvived}, Max: ${maxSurvived}, Avg: ${avgSurvived}, Completion: ${completion}/${totalSimulations} (${((completion / totalSimulations) * 100).toFixed(2)}%)`);
-      });
-      
-      it("should never exceed 0.97x EV on any block", () => {
-        const errors =[];
-
-        for (let blockIndex = 0; blockIndex < maxBlock; blockIndex++) {
-          let survived = 0;
+    Object.entries(data).forEach(([source, blocks]) => {
+      describe(`Using ${source} block data`, () => {
+        const totalSimulations = blocks.length - maxBlock;
+        it("should simulate games", () => {
+          const survived = [];
 
           for (let i = 0; i < totalSimulations; i++) {
-            const rngs = gameBlocks.slice(i, i + maxBlock).map((block) => block.rng);
+            const rngs = blocks.slice(i, i + maxBlock).map((block) => block.rng);
             const result = simulateGame(rngs, thresholds);
-            if (result > blockIndex) survived++;
+            survived.push(result);
           }
 
-          const survivalRate = survived / totalSimulations;
-          const ev = survivalRate * Number(multipliers[blockIndex]) / 1e6;
+          const minSurvived = Math.min(...survived);
+          const maxSurvived = Math.max(...survived);
+          const avgSurvived = survived.reduce((acc, val) => acc + val, 0) / survived.length;
+          const completion = survived.filter((s) => s === maxBlock).length;
 
-          if (ev > 0.97) {
-            console.warn(`⚠️ Block ${blockIndex + 1} has EV ${ev.toFixed(4)} > 0.97x`);
+          expect(minSurvived).toBeGreaterThanOrEqual(0);
+          expect(maxSurvived).toBeLessThanOrEqual(maxBlock);
+          console.log(`[${source}] ${key} - Min: ${minSurvived}, Max: ${maxSurvived}, Avg: ${avgSurvived}, Completion: ${completion}/${totalSimulations} (${((completion / totalSimulations) * 100).toFixed(2)}%)`);
+        });
+        
+        it("should never exceed 0.97x EV on any block", () => {
+          const errors =[];
+
+          for (let blockIndex = 0; blockIndex < maxBlock; blockIndex++) {
+            let survived = 0;
+
+            for (let i = 0; i < totalSimulations; i++) {
+              const rngs = blocks.slice(i, i + maxBlock).map((block) => block.rng);
+              const result = simulateGame(rngs, thresholds);
+              if (result > blockIndex) survived++;
+            }
+
+            const survivalRate = survived / totalSimulations;
+            const ev = survivalRate * Number(multipliers[blockIndex]) / 1e6;
+
+            if (ev > 0.97) {
+              // console.warn(`⚠️ Block ${blockIndex + 1} has EV ${ev.toFixed(4)} > 0.97x`);
+            }
+
+            if (ev > 1.0) {
+              errors.push(`Block ${blockIndex + 1} has EV ${ev.toFixed(4)} > 1.0x`);
+            }
           }
 
-          if (ev > 1.0) {
-            errors.push(`Block ${blockIndex + 1} has EV ${ev.toFixed(4)} > 1.0x`);
-          }
-        }
-
-        expect(errors).toHaveLength(0);
-      });
-    });
-
-    describe("Using simulated random values", () => {
-      const totalSimulations = 5000;
-
-      it("should simulate games", () => {
-        const survived = [];
-
-        for (let i = 0; i < totalSimulations; i++) {
-          const rngs = Array.from({ length: maxBlock }, () => randomRNG());
-          const result = simulateGame(rngs, thresholds);
-          survived.push(result);
-        }
-
-        const minSurvived = Math.min(...survived);
-        const maxSurvived = Math.max(...survived);
-        const avgSurvived = survived.reduce((acc, val) => acc + val, 0) / survived.length;
-        const completion = survived.filter((s) => s === maxBlock).length;
-
-        expect(minSurvived).toBeGreaterThanOrEqual(0);
-        expect(maxSurvived).toBeLessThanOrEqual(maxBlock);
-        console.log(`[RND] ${key} - Min: ${minSurvived}, Max: ${maxSurvived}, Avg: ${avgSurvived}, Completion: ${completion}/${totalSimulations} (${((completion / totalSimulations) * 100).toFixed(2)}%)`);
-      });
-
-      it("should never exceed 0.97x EV on any block", () => {
-        const errors =[];
-        for (let blockIndex = 0; blockIndex < maxBlock; blockIndex++) {
-          let survived = 0;
-
-          for (let i = 0; i < totalSimulations; i++) {
-            const rngs = Array.from({ length: maxBlock }, () => randomRNG());
-            const result = simulateGame(rngs, thresholds);
-            if (result > blockIndex) survived++;
-          }
-
-          const survivalRate = survived / totalSimulations;
-          const ev = survivalRate * Number(multipliers[blockIndex]) / 1e6;
-
-          if (ev > 0.97) {
-            console.warn(`⚠️ Block ${blockIndex + 1} has EV ${ev.toFixed(4)} > 0.97x`);
-          }
-
-          if (ev > 1.0) {
-            errors.push(`Block ${blockIndex + 1} has EV ${ev.toFixed(4)} > 1.0x`);
-          }
-        }
-
-        expect(errors).toHaveLength(0);
+          expect(errors).toHaveLength(0);
+        });
       });
     });
   });
