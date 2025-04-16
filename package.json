@@ -11,7 +11,8 @@
     "lint:fix": "next lint --fix",
     "graph:compile": "graphql-codegen --config codegen.ts",
     "graph:watch": "graphql-codegen -w",
-    "fetch:blocks": "ts-node scripts/fetch-blocks.ts"
+    "script:blocks": "ts-node scripts/fetch-blocks.ts",
+    "script:thresholds": "ts-node scripts/optimise-thresholds.ts"
   },
   "dependencies": {
     "@account-kit/infra": "^4.26.0",
