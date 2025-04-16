@@ -82,10 +82,11 @@ Object.entries(curves).forEach(([key, value]) => {
         const minSurvived = Math.min(...survived);
         const maxSurvived = Math.max(...survived);
         const avgSurvived = survived.reduce((acc, val) => acc + val, 0) / survived.length;
+        const completion = survived.filter((s) => s === maxBlock).length;
 
         expect(minSurvived).toBeGreaterThanOrEqual(0);
         expect(maxSurvived).toBeLessThanOrEqual(maxBlock);
-        console.log(`[CHAIN] ${key} - Min: ${minSurvived}, Max: ${maxSurvived}, Avg: ${avgSurvived}`);
+        console.log(`[CHAIN] ${key} - Min: ${minSurvived}, Max: ${maxSurvived}, Avg: ${avgSurvived}, Completion: ${completion}/${totalSimulations} (${((completion / totalSimulations) * 100).toFixed(2)}%)`);
       });
       
       it("should never exceed 0.97x EV on any block", () => {
@@ -125,10 +126,11 @@ Object.entries(curves).forEach(([key, value]) => {
         const minSurvived = Math.min(...survived);
         const maxSurvived = Math.max(...survived);
         const avgSurvived = survived.reduce((acc, val) => acc + val, 0) / survived.length;
+        const completion = survived.filter((s) => s === maxBlock).length;
 
         expect(minSurvived).toBeGreaterThanOrEqual(0);
         expect(maxSurvived).toBeLessThanOrEqual(maxBlock);
-        console.log(`[RND] ${key} - Min: ${minSurvived}, Max: ${maxSurvived}, Avg: ${avgSurvived}`);
+        console.log(`[RND] ${key} - Min: ${minSurvived}, Max: ${maxSurvived}, Avg: ${avgSurvived}, Completion: ${completion}/${totalSimulations} (${((completion / totalSimulations) * 100).toFixed(2)}%)`);
       });
 
       it("should never exceed 0.97x EV on any block", () => {
