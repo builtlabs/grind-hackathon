@@ -57,13 +57,19 @@ function simulateGame(rngs: bigint[], thresholds: bigint[]): number {
   return livedFor;
 }
 
-const curves = {
-  v1: ["./loot-tables/v1/thresholds.csv", "./loot-tables/v1/multipliers.csv"],
-  v2: ["./loot-tables/v2/thresholds.csv", "./loot-tables/v2/multipliers.csv"],
-  v3: ["./loot-tables/v3/thresholds.csv", "./loot-tables/v3/multipliers.csv"],
-  v4: ["./loot-tables/v4/thresholds.csv", "./loot-tables/v4/multipliers.csv"],
-  v5: ["./loot-tables/v5/thresholds.csv", "./loot-tables/v5/multipliers.csv"],
-};
+const lootTablePath = path.join(__dirname, "./loot-tables");
+const directories = fs.readdirSync(lootTablePath, { withFileTypes: true })
+  .filter((dir) => dir.isDirectory())
+  .map((dir) => dir.name);
+
+const curves = directories.reduce((acc, dir) => {
+  const thresholdsPath = path.join(lootTablePath, dir, "thresholds.csv");
+  const multipliersPath = path.join(lootTablePath, dir, "multipliers.csv");
+  if (fs.existsSync(thresholdsPath) && fs.existsSync(multipliersPath)) {
+    acc[dir] = [thresholdsPath, multipliersPath];
+  }
+  return acc;
+}, {} as Record<string, [string, string]>);
 
 const rngPath = path.join(__dirname, "./block-data.json");
 const gameBlocks = loadBlockRNG(rngPath);
@@ -76,10 +82,8 @@ const data = {
 
 Object.entries(curves).forEach(([key, value]) => {
   describe(`Game Simulation — ${key}`, () => {
-    const thresholdPath = path.join(__dirname, value[0]);
-    const multipliersPath = path.join(__dirname, value[1]);
-    const thresholds = loadCsv(thresholdPath);
-    const multipliers = loadCsv(multipliersPath);
+    const thresholds = loadCsv(value[0]);
+    const multipliers = loadCsv(value[1]);
     const maxBlock = thresholds.length;
 
     Object.entries(data).forEach(([source, blocks]) => {
