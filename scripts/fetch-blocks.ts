@@ -3,17 +3,19 @@ import path from "path";
 import dotenv from "dotenv";
 import { createPublicClient, http } from "viem";
 import { mainnet } from "viem/chains";
+import { Network } from "alchemy-sdk";
 
 dotenv.config();
 
+const network = Network.ABSTRACT_MAINNET;
 const ALCHEMY_KEY = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY;
 const provider = createPublicClient({
   chain: mainnet,
-  transport: http(`https://abstract-testnet.g.alchemy.com/v2/${ALCHEMY_KEY}`),
+  transport: http(`https://${network}.g.alchemy.com/v2/${ALCHEMY_KEY}`),
 });
 
 const count = 2000;
-const outputPath = path.join(__dirname, "../resources/block-data.json");
+const outputPath = path.join(__dirname, `../resources/block-data-${network}.json`);
 
 async function main() {
   const latest = await provider.getBlockNumber();

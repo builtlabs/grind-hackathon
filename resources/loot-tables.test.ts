@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
+import { Network } from "alchemy-sdk";
 
 interface BlockRNG {
   blockNumber: number;
@@ -71,7 +72,8 @@ const curves = directories.reduce((acc, dir) => {
   return acc;
 }, {} as Record<string, [string, string]>);
 
-const rngPath = path.join(__dirname, "./block-data.json");
+const network = Network.ABSTRACT_MAINNET;
+const rngPath = path.join(__dirname, `./block-data-${network}.json`);
 const gameBlocks = loadBlockRNG(rngPath);
 const fakeBlocks = generateFakeBlocks(1000000);
 
