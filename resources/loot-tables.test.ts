@@ -67,16 +67,14 @@ Object.entries(curves).forEach(([key, value]) => {
     const thresholds = loadCsv(thresholdPath);
     const multipliers = loadCsv(multipliersPath);
     const maxBlock = thresholds.length;
-    const totalSimulations = Math.floor(gameBlocks.length / maxBlock);
+    const totalSimulations = gameBlocks.length - maxBlock;
 
     describe("Using real on-chain block data", () => {
       it("should simulate games", () => {
         const survived = [];
 
         for (let i = 0; i < totalSimulations; i++) {
-          // take a random sample of maxBlock blocks from the 500 blocks available
-          const startIndex = Math.floor(Math.random() * (gameBlocks.length - maxBlock));
-          const rngs = gameBlocks.slice(startIndex, startIndex + maxBlock).map((block) => block.rng);
+          const rngs = gameBlocks.slice(i, i + maxBlock).map((block) => block.rng);
           const result = simulateGame(rngs, thresholds);
           survived.push(result);
         }
@@ -95,9 +93,7 @@ Object.entries(curves).forEach(([key, value]) => {
           let survived = 0;
 
           for (let i = 0; i < totalSimulations; i++) {
-            // take a random sample of maxBlock blocks from the 500 blocks available
-            const startIndex = Math.floor(Math.random() * (gameBlocks.length - maxBlock));
-            const rngs = gameBlocks.slice(startIndex, startIndex + maxBlock).map((block) => block.rng);
+            const rngs = gameBlocks.slice(i, i + maxBlock).map((block) => block.rng);
             const result = simulateGame(rngs, thresholds);
             if (result > blockIndex) survived++;
           }
@@ -111,7 +107,7 @@ Object.entries(curves).forEach(([key, value]) => {
     });
 
     describe("Using simulated random values", () => {
-      const totalSimulations = 1000;
+      const totalSimulations = 5000;
 
       it("should simulate games", () => {
         const survived = [];
