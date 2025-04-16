@@ -6,10 +6,12 @@
     "dev": "next dev --turbopack",
     "build": "pnpm graph:compile && next build",
     "start": "next start",
+    "test": "jest",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "graph:compile": "graphql-codegen --config codegen.ts",
-    "graph:watch": "graphql-codegen -w"
+    "graph:watch": "graphql-codegen -w",
+    "fetch:blocks": "ts-node scripts/fetch-blocks.ts"
   },
   "dependencies": {
     "@account-kit/infra": "^4.26.0",
@@ -50,6 +52,7 @@
     "@graphql-codegen/introspection": "^4.0.3",
     "@tailwindcss/postcss": "^4",
     "@tailwindcss/typography": "^0.5.16",
+    "@types/jest": "^29.5.14",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -57,10 +60,14 @@
     "eslint": "^9",
     "eslint-config-next": "15.3.0",
     "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-jest": "^28.11.0",
     "eslint-plugin-prettier": "^5.2.6",
+    "jest": "^29.7.0",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "tailwindcss": "^4",
+    "ts-jest": "^29.3.2",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }
