@@ -1,18 +1,11 @@
 # TODO
 
 ## Infrastructure
-- Block Number
-  - When it changes we will call `api/game/:blocknumber` which calls view functions
-    - cached forever
-    - Pass the block number to viem
 - Sending Transactions
   - Wait for it to send
   - Fetch new game state
-
-- Test out some math using jest unit tests
-  - Determine the probability the game reaches the end (50 blocks etc)
-  - Determine the probability of a block being a crash (end game)
-  - Test the probability using the block hash of the last 100 blocks
+- Use the contract from Francis
+- Remove the GraphQL code if its not needed
 
 ## Domain
 - Register the domain
