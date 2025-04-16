@@ -90,6 +90,8 @@ Object.entries(curves).forEach(([key, value]) => {
       });
       
       it("should never exceed 0.97x EV on any block", () => {
+        const errors =[];
+
         for (let blockIndex = 0; blockIndex < maxBlock; blockIndex++) {
           let survived = 0;
 
@@ -106,8 +108,12 @@ Object.entries(curves).forEach(([key, value]) => {
             console.warn(`⚠️ Block ${blockIndex + 1} has EV ${ev.toFixed(4)} > 0.97x`);
           }
 
-          expect(ev).toBeLessThanOrEqual(1.0);
+          if (ev > 1.0) {
+            errors.push(`Block ${blockIndex + 1} has EV ${ev.toFixed(4)} > 1.0x`);
+          }
         }
+
+        expect(errors).toHaveLength(0);
       });
     });
 
@@ -134,6 +140,7 @@ Object.entries(curves).forEach(([key, value]) => {
       });
 
       it("should never exceed 0.97x EV on any block", () => {
+        const errors =[];
         for (let blockIndex = 0; blockIndex < maxBlock; blockIndex++) {
           let survived = 0;
 
@@ -150,8 +157,12 @@ Object.entries(curves).forEach(([key, value]) => {
             console.warn(`⚠️ Block ${blockIndex + 1} has EV ${ev.toFixed(4)} > 0.97x`);
           }
 
-          expect(ev).toBeLessThanOrEqual(1.0);
+          if (ev > 1.0) {
+            errors.push(`Block ${blockIndex + 1} has EV ${ev.toFixed(4)} > 1.0x`);
+          }
         }
+
+        expect(errors).toHaveLength(0);
       });
     });
   });
