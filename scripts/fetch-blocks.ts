@@ -12,7 +12,7 @@ const provider = createPublicClient({
   transport: http(`https://abstract-testnet.g.alchemy.com/v2/${ALCHEMY_KEY}`),
 });
 
-const count = 500;
+const count = 2000;
 const outputPath = path.join(__dirname, "../resources/block-data.json");
 
 async function main() {
