@@ -2,7 +2,6 @@
 
 ## Infrastructure
 - Alchemy chain webhook for resetting the game
-- Remove the GraphQL code if its not needed
 
 ## Privy
 - Set up the domain with Privy
