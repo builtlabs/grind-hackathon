@@ -10,6 +10,7 @@ import { ThemeSwitch } from '@/components/theme-switch';
 import { BlockProvider } from '@/components/providers/block';
 import { Toaster } from '@/components/ui/sonner';
 import { AbstractWalletWrapper } from '@/components/providers/abstract';
+import MatrixRainBackground from '@/components/background';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -45,6 +46,7 @@ export default async function RootLayout({
           disableTransitionOnChange
           nonce={nonce}
         >
+          <MatrixRainBackground />
           <AbstractWalletWrapper nonce={nonce}>
             <BlockProvider>
               <Header />
