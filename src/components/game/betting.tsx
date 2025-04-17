@@ -1,70 +1,63 @@
 'use client';
 
-import { useState } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { Switch } from '../ui/switch';
-import { toast } from 'sonner';
-import { CrossAppAccountWithMetadata, usePrivy } from '@privy-io/react-auth';
-import { Address, formatUnits } from 'viem';
-import { abi, addresses } from '@/contracts/grind';
 import { abstractTestnet } from 'viem/chains';
-import { ABSTRACT_APP_ID } from '@/lib/abstract';
-import { useReadContracts } from 'wagmi';
 import { Mint } from '../mint';
+import { useSendTransaction } from '@/hooks/use-send-transaction';
+import { useGrindBalance } from '@/hooks/use-grind-balance';
+import { encodeFunctionData, formatUnits, parseUnits } from 'viem';
+import { abi, addresses } from '@/contracts/block-crash';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { multipliers } from '@/lib/block-crash';
+import { useGame } from '../providers/game';
+import { toast } from 'sonner';
 
 export const Betting: React.FC = () => {
-  const [autoCashOut, setAutoCashOut] = useState(false);
-  const { user } = usePrivy();
-
-  const account = user?.linkedAccounts.find(
-    account => account.type === 'cross_app' && account.providerApp.id === ABSTRACT_APP_ID
-  ) as CrossAppAccountWithMetadata | undefined;
-
-  const grind = useReadContracts({
-    allowFailure: false,
-    contracts: [
-      {
-        address: addresses[abstractTestnet.id],
-        abi,
-        functionName: 'balanceOf',
-        args: [account?.embeddedWallets[0].address as Address],
-      },
-      {
-        address: addresses[abstractTestnet.id],
-        abi,
-        functionName: 'decimals',
-      },
-      {
-        address: addresses[abstractTestnet.id],
-        abi,
-        functionName: 'symbol',
-      },
-    ],
-    query: {
-      enabled: !!account,
-      select(data) {
-        const formatted = formatUnits(data[0], data[1]);
-
-        return {
-          formatted,
-          value: Number(formatted),
-          symbol: data[2],
-        };
-      },
-    },
+  const { state } = useGame();
+  const { sendTransaction } = useSendTransaction({
+    key: 'mint-grind',
   });
+
+  const grind = useGrindBalance();
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const amount = formData.get('amount');
-    const multiplier = formData.get('multiplier');
 
-    toast.info(`Betting ${amount} at ${multiplier}x`, {
-      description: 'This is a placeholder for the betting action.',
-      duration: 3000,
+    if (!grind.data || !state) return;
+
+    const formData = new FormData(e.currentTarget);
+    const amount = formData.get('amount') as string;
+    const multiplier = formData.get('multiplier') as string;
+
+    const bigAmount = parseUnits(amount, grind.data.decimals);
+
+    console.log('amount', amount);
+    console.log('bigAmount', bigAmount);
+    console.log('liquidity', state.liquidity);
+    console.log('multiplier', multiplier);
+
+    if (bigAmount > BigInt(state.liquidity)) {
+      toast.error('Bet too large', {
+        description: `Your bet amount is larger than the current liquidity of the game.`,
+      });
+    }
+
+    // TODO: approve the tokens
+    sendTransaction({
+      to: addresses[abstractTestnet.id],
+      data: encodeFunctionData({
+        abi,
+        functionName: 'placeBet',
+        args: [bigAmount, BigInt(multiplier)],
+      }),
     });
   }
 
@@ -93,25 +86,22 @@ export const Betting: React.FC = () => {
           <Mint onSuccess={grind.refetch} disabled={grind.data && grind.data?.value >= 500} />
         </div>
 
-        <div className="flex items-center gap-2">
-          <Switch id="auto-cashout" checked={autoCashOut} onCheckedChange={setAutoCashOut} />
-          <Label htmlFor="auto-cashout">Auto Cashout</Label>
-        </div>
-
         <div className="flex flex-col">
           <Label htmlFor="multiplier" className="mb-1">
-            Multiplier
+            Auto Cashout
           </Label>
-          <Input
-            id="multiplier"
-            name="multiplier"
-            type="number"
-            placeholder="1.00"
-            className="w-full"
-            min={1}
-            step={0.01}
-            disabled={!autoCashOut}
-          />
+          <Select name="multiplier" defaultValue="49">
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {multipliers.map((multiplier, index) => (
+                <SelectItem key={multiplier} value={index.toString()}>
+                  {formatUnits(multiplier, 6)}x
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <Button className="mt-4 w-full" type="submit">
