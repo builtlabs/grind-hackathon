@@ -28,17 +28,19 @@ interface BodyShape {
 export async function POST(request: Request) {
   const signature = request.headers.get('x-alchemy-signature');
 
-  if (!signature) {
-    console.log(`⚠️ Webhook missing signature.`);
-    return new Response('Missing signature', { status: 400 });
-  }
-
   const body = await request.text();
   console.log(body); // TODO: remove once we are confident the contracts are integrated correctly
 
-  if (!verifySignature(signature, body)) {
-    console.log(`⚠️ Webhook signature verification failed.`);
-    return new Response('Invalid signature', { status: 400 });
+  if (env.NODE_ENV !== 'development') {
+    if (!signature) {
+      console.log(`⚠️ Webhook missing signature.`);
+      return new Response('Missing signature', { status: 400 });
+    }
+
+    if (!verifySignature(signature, body)) {
+      console.log(`⚠️ Webhook signature verification failed.`);
+      return new Response('Invalid signature', { status: 400 });
+    }
   }
 
   const data = JSON.parse(body) as BodyShape;
