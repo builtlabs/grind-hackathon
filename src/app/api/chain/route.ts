@@ -48,16 +48,18 @@ export async function POST(request: Request) {
     `/api/game?blockNumber=${data.event.data.block.number}`
   );
 
+  const crashed = state.end === data.event.data.block.number - 1;
   console.log(
     `🔍 Current game state: ${JSON.stringify({
       block: data.event.data.block.number,
       start: state.start,
       end: state.end,
+      crashed,
     })}`
   );
 
-  if (state.end === data.event.data.block.number - 1) {
-    console.log(`🏁 Game ended at block ${data.event.data.block.number}`);
+  if (crashed) {
+    console.log(`🏁 Game ended at block ${data.event.data.block.number - 1}`);
 
     try {
       const hash = await walletClient.sendTransaction({
