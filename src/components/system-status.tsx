@@ -2,13 +2,12 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { useBlockNumber } from 'wagmi';
 import { SquareActivity } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { fetcher } from '@/lib/fetch';
 import { GetBlockNumberQuery } from '@/graph/graphql';
-import { usePrivy } from '@privy-io/react-auth';
+import { useBlock } from './providers/block';
 
 type Status = 'out-of-sync' | 'normal';
 
@@ -33,7 +32,6 @@ interface SystemStatusProps {
 }
 
 export const SystemStatus: React.FC<SystemStatusProps> = ({ className }) => {
-  const { ready, authenticated } = usePrivy();
   const [status, setStatus] = useState<Status>('normal');
 
   const { data: graph, isFetching: isFetchingGraph } = useQuery({
@@ -44,20 +42,12 @@ export const SystemStatus: React.FC<SystemStatusProps> = ({ className }) => {
       const blockNumber = data._meta?.block.number;
       return blockNumber ? BigInt(blockNumber) : null;
     },
-    enabled: ready && authenticated,
   });
 
-  // TODO: use the api route we are going to add?
-  const { data: chain, isFetching: isFetchingChain } = useBlockNumber({
-    watch: false,
-    query: {
-      refetchInterval: 10000,
-      enabled: ready && authenticated,
-    },
-  });
+  const { number: chain } = useBlock();
 
   useEffect(() => {
-    if (isFetchingGraph || isFetchingChain) {
+    if (isFetchingGraph) {
       return;
     }
 
@@ -65,14 +55,10 @@ export const SystemStatus: React.FC<SystemStatusProps> = ({ className }) => {
       return;
     }
 
-    const numbers = [graph, chain];
+    const numbers = [graph, BigInt(chain)];
     const state = allWithinRange(numbers, 10) ? 'normal' : 'out-of-sync';
     setStatus(state);
-  }, [graph, chain, isFetchingGraph, isFetchingChain]);
-
-  if (!ready || !authenticated) {
-    return null;
-  }
+  }, [graph, chain, isFetchingGraph]);
 
   return (
     <TooltipProvider>
@@ -87,7 +73,17 @@ export const SystemStatus: React.FC<SystemStatusProps> = ({ className }) => {
           <SquareActivity className="size-6" />
         </TooltipTrigger>
         <TooltipContent side="bottom">
-          {status === 'normal' ? <span>All systems normal</span> : <span>System out of sync</span>}
+          {status === 'normal' ? (
+            <span>All systems normal</span>
+          ) : (
+            <>
+              <span>System out of sync</span>
+              <br />
+              <span className="text-muted-foreground">Graph: {graph?.toString()}</span>
+              <br />
+              <span className="text-muted-foreground">Chain: {chain?.toString()}</span>
+            </>
+          )}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

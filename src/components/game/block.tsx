@@ -3,53 +3,73 @@
 import { cn } from '@/lib/utils';
 import { useGame } from '../providers/game';
 import { useBlock } from '../providers/block';
-import { useMemo } from 'react';
+import { useEffect, useState } from 'react';
+
+interface BlockInfo {
+  number: number;
+  multiplier: number;
+  result: 'ok' | 'crash' | 'none';
+}
+
+function generateBlock(number: number): BlockInfo {
+  const rnd = Math.floor(Math.random() * 100) + 1;
+  return {
+    number,
+    multiplier: rnd,
+    result: rnd > 50 ? 'ok' : rnd > 20 ? 'crash' : 'none',
+  };
+}
 
 export const GameBlock: React.FC = () => {
   const { number } = useBlock();
+  const [blocks, setBlocks] = useState<BlockInfo[]>([]);
   useGame();
 
-  const blocks = useMemo(() => {
-    const blocks = [];
-    for (let i = 0; i < 5; i++) {
-      blocks.push({
-        number: number + i - 3,
-        multiplier: Math.floor(Math.random() * 100) + 1,
-        result: (i === 1 ? 'crash' : 'ok') as 'ok' | 'crash',
-      });
+  useEffect(() => {
+    if (!number) {
+      return;
     }
-    return blocks;
+
+    setBlocks(current => {
+      const newBlocks: BlockInfo[] = [];
+
+      for (let i = 0; i < 5; i++) {
+        const blockNumber = number + i - 2;
+        const block = current.find(b => b.number === blockNumber);
+        if (block) {
+          newBlocks.push(block);
+        } else {
+          newBlocks.push(generateBlock(blockNumber));
+        }
+      }
+
+      return newBlocks;
+    });
   }, [number]);
 
   return (
-    <div className="h-96 overflow-hidden rounded border p-3">
-      <p className="text-2xl font-bold">CONTRACT OWNER</p>
+    <div className="flex flex-col gap-11 py-5">
+      <div className="flex flex-col items-center">
+        <p className="text-base">Current Multiplier</p>
+        <p className="text-7xl font-bold">{blocks[2]?.multiplier}x</p>
+      </div>
       <div className="relative isolate mx-20 flex size-52 items-center">
         {blocks.map((block, index) => (
-          <Block
-            key={block.number}
-            index={index}
-            number={block.number}
-            multiplier={block.multiplier}
-            result={block.result}
-          />
+          <Block key={block.number} index={index} block={block} />
         ))}
       </div>
     </div>
   );
 };
 
-interface BlockInfo {
-  number: number;
+interface BlockProps {
+  block: BlockInfo;
   index: number;
-  multiplier: number;
-  result: 'ok' | 'crash' | 'none';
 }
 
-const Block: React.FC<BlockInfo> = ({ number, index, multiplier, result }) => {
+const Block: React.FC<BlockProps> = ({ block, index }) => {
   return (
     <div
-      key={number}
       className={cn(
         'absolute flex size-52 flex-none flex-col items-center rounded border-4 p-4',
         'transition-all duration-1000 ease-in-out',
@@ -58,13 +78,13 @@ const Block: React.FC<BlockInfo> = ({ number, index, multiplier, result }) => {
         index === 2 && 'z-10 scale-100',
         index === 3 && '-z-10 translate-x-1/2 scale-80',
         index === 4 && '-z-20 scale-0',
-        result === 'ok' && 'border-[#269418] bg-[#196622]',
-        result === 'crash' && 'border-[#941818] bg-[#5E0C0D]',
-        result === 'none' && 'border-[#444] bg-[#1d1d1d]'
+        block.result === 'ok' && 'border-[#269418] bg-[#196622]',
+        block.result === 'crash' && 'border-[#941818] bg-[#5E0C0D]',
+        block.result === 'none' && 'border-[#444] bg-[#1d1d1d]'
       )}
     >
-      <p className="text-xl font-bold opacity-70">#{number}</p>
-      <p className="absolute top-1/2 -translate-y-1/2 text-4xl font-bold">{multiplier}x</p>
+      <p className="text-xl font-bold opacity-70">#{block.number}</p>
+      <p className="absolute top-1/2 -translate-y-1/2 text-4xl font-bold">{block.multiplier}x</p>
     </div>
   );
 };

@@ -10,6 +10,7 @@ import { Header } from '@/components/core/header';
 import { Footer } from '@/components/core/footer';
 import { ThemeSwitch } from '@/components/theme-switch';
 import { WagmiProvider } from '@/components/providers/wagmi';
+import { BlockProvider } from '@/components/providers/block';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -48,10 +49,12 @@ export default async function RootLayout({
           <WagmiProvider>
             <QueryProvider nonce={nonce}>
               <PrivyProvider>
-                <div className="flex min-h-screen flex-col">
+                <BlockProvider>
                   <Header />
-                  {children}
-                </div>
+                  <div className="flex h-[calc(100vh-4rem)] flex-col overflow-hidden">
+                    {children}
+                  </div>
+                </BlockProvider>
                 <Footer />
                 <ThemeSwitch className="fixed right-10 bottom-10 z-50 hidden xl:flex" />
               </PrivyProvider>
