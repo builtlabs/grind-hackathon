@@ -86,7 +86,7 @@ export const GameBlock: React.FC = () => {
         <p className="text-base">Current Multiplier</p>
         <p className="text-7xl font-bold">{formatUnits(blocks[2]?.multiplier ?? 0n, 6)}x</p>
       </div>
-      <div className="relative isolate mx-20 flex size-40 items-center">
+      <div className="relative isolate mx-20 flex size-40 items-center lg:size-52">
         {blocks.map((block, index) => (
           <Block key={block.number} index={index} block={block} />
         ))}
