@@ -18,6 +18,8 @@ export const Balance: React.FC = () => {
     },
   });
 
+  if (!client) return null;
+
   return (
     <Badge className="text-muted-foreground text-xs">
       {balance.isSuccess ? `${balance.data?.formatted} ${balance.data?.symbol}` : 'Loading...'}
