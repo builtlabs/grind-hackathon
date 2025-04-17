@@ -2,11 +2,8 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { headers } from 'next/headers';
-import { ThemeProvider } from '@/components/providers/theme';
-import { THEME_COOKIE_KEY } from '@/lib/cookies';
 import { Header } from '@/components/core/header';
 import { Footer } from '@/components/core/footer';
-import { ThemeSwitch } from '@/components/theme-switch';
 import { BlockProvider } from '@/components/providers/block';
 import { Toaster } from '@/components/ui/sonner';
 import { AbstractWalletWrapper } from '@/components/providers/abstract';
@@ -38,27 +35,17 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ThemeProvider
-          storageKey={THEME_COOKIE_KEY}
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-          nonce={nonce}
-        >
-          <AbstractWalletWrapper nonce={nonce}>
-            <BlockProvider>
-              <Header />
-              <div className="relative -mt-16 flex flex-col overflow-hidden lg:h-screen lg:pt-16">
-                <MatrixRainBackground />
-                {children}
-              </div>
-            </BlockProvider>
-            <Footer />
-            <ThemeSwitch className="fixed right-10 bottom-10 z-50 hidden xl:flex" />
-          </AbstractWalletWrapper>
-          <Toaster />
-        </ThemeProvider>
+        <AbstractWalletWrapper nonce={nonce}>
+          <BlockProvider>
+            <Header />
+            <div className="relative -mt-16 flex flex-col overflow-hidden lg:h-screen lg:pt-16">
+              <MatrixRainBackground />
+              {children}
+            </div>
+          </BlockProvider>
+          <Footer />
+        </AbstractWalletWrapper>
+        <Toaster />
       </body>
     </html>
   );
