@@ -10,13 +10,13 @@ const alchemy = new Alchemy({
 });
 
 interface BlockData {
-  number: number;
+  number?: number;
 }
 
 const BlockContext = createContext<BlockData | null>(null);
 
 export const BlockProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [block, setBlock] = useState<number>(0);
+  const [block, setBlock] = useState<number>();
 
   useEffect(() => {
     function handleBlock(block: number) {

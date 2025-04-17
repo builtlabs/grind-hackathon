@@ -83,8 +83,8 @@ export const GameBlock: React.FC = () => {
         ))}
       </div>
       <div className="flex flex-row-reverse items-center gap-3">
-        {state?.history.map(result => (
-          <Badge key={result}>{formatUnits(BigInt(result), 6)}x</Badge>
+        {state?.history.map((result, index) => (
+          <Badge key={index}>{formatUnits(BigInt(result), 6)}x</Badge>
         ))}
       </div>
     </div>

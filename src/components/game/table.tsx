@@ -25,9 +25,9 @@ function stillAlive(
 function stillGrinding(
   bet: { cashoutIndex: number },
   state: { start: number; end?: number },
-  blockNumber: number
+  blockNumber?: number
 ): boolean {
-  return !state.end && state.start + bet.cashoutIndex > blockNumber;
+  return !!blockNumber && !state.end && state.start + bet.cashoutIndex > blockNumber;
 }
 
 export const GameTable: React.FC = () => {

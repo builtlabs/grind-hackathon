@@ -20,8 +20,10 @@ import {
 import { multipliers } from '@/lib/block-crash';
 import { useGame } from '../providers/game';
 import { toast } from 'sonner';
+import { useBlock } from '../providers/block';
 
 export const Betting: React.FC = () => {
+  const { number } = useBlock();
   const { state } = useGame();
   const { sendTransaction } = useSendTransaction({
     key: 'place-bet',
@@ -68,6 +70,28 @@ export const Betting: React.FC = () => {
 
   return (
     <div className="flex flex-col">
+      <h2 className="text-xl font-bold">Place a Bet</h2>
+      {!state?.start && 'Place a bet to start the game'}
+
+      {state?.start && number && state?.start > number ? (
+        <h3>
+          Round Starting in <strong>{state.start - number}</strong> blocks
+        </h3>
+      ) : null}
+
+      {!state?.end && state?.start && number && state?.start <= number ? (
+        <h3>
+          Round Ending in <strong>{multipliers.length - (number - state.start)}</strong> blocks
+        </h3>
+      ) : null}
+
+      {state?.end && number ? (
+        <h3>
+          Round ended at block <strong>{state.end}</strong> with a multiplier of{' '}
+          <strong>{formatUnits(multipliers[state.end - state.start], 6)}x</strong>
+        </h3>
+      ) : null}
+
       <form className="flex w-80 flex-col gap-4" onSubmit={handleSubmit}>
         <div className="flex flex-col">
           <div className="flex items-center justify-between">
@@ -109,7 +133,11 @@ export const Betting: React.FC = () => {
           </Select>
         </div>
 
-        <Button className="mt-4 w-full" type="submit">
+        <Button
+          className="mt-4 w-full"
+          type="submit"
+          disabled={state?.start && number ? state?.start > number : false}
+        >
           Place Bet
         </Button>
       </form>
