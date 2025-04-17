@@ -11,8 +11,9 @@ import {
 import Image from 'next/image';
 import { useGame } from '../providers/game';
 import { multipliers } from '@/lib/block-crash';
-import { cn } from '@/lib/utils';
+import { cn, shorthandHex } from '@/lib/utils';
 import { useBlock } from '../providers/block';
+import { formatUnits } from 'viem';
 
 function stillAlive(
   bet: { cashoutIndex: number },
@@ -47,7 +48,9 @@ export const GameTable: React.FC = () => {
           />
           <div className="flex flex-col">
             <span className="text-muted-foreground">Grind Bet</span>
-            <span>{state?.bets.reduce((a, b) => a + BigInt(b.amount), BigInt(0))}</span>
+            <span>
+              {formatUnits(state?.bets.reduce((a, b) => a + BigInt(b.amount), BigInt(0)) ?? 0n, 18)}
+            </span>
           </div>
         </div>
         <div className="flex flex-col">
@@ -71,13 +74,16 @@ export const GameTable: React.FC = () => {
           </TableHeader>
           <TableBody>
             {state?.bets.map((bet, i) => {
-              const profit = BigInt(bet.amount) * BigInt(multipliers[bet.cashoutIndex]);
               const crashed = !stillAlive(bet, state);
+              const bigAmount = BigInt(bet.amount);
+              const multiplier = multipliers[bet.cashoutIndex];
+              const formattedMultiplier = formatUnits(multiplier, 6);
+              const profit = formatUnits((bigAmount * multiplier) / BigInt(1e6), 18);
               return (
                 <TableRow key={i}>
-                  <TableCell>{bet.user}</TableCell>
-                  <TableCell>{bet.amount}</TableCell>
-                  <TableCell>{multipliers[bet.cashoutIndex]}x</TableCell>
+                  <TableCell>{shorthandHex(bet.user)}</TableCell>
+                  <TableCell>{formatUnits(bigAmount, 18)}</TableCell>
+                  <TableCell>{formattedMultiplier}x</TableCell>
                   <TableCell className={cn(crashed ? 'text-red-500' : 'text-green-500')}>
                     {profit}
                   </TableCell>

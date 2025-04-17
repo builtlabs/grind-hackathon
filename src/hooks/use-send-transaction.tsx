@@ -15,7 +15,11 @@ export function useSendTransaction(options: Options) {
 
   const transaction = useMutation({
     mutationKey: [options.key],
-    mutationFn: async (transaction: SendTransactionParameters<Chain, Account>) => {
+    mutationFn: async (
+      transaction:
+        | SendTransactionParameters<Chain, Account>
+        | SendTransactionParameters<Chain, Account>[]
+    ) => {
       if (isPending) {
         toast.error('Connect Abstract', {
           id: options.key,
@@ -32,7 +36,9 @@ export function useSendTransaction(options: Options) {
         return;
       }
 
-      const hash = await client.sendTransaction(transaction);
+      const hash = await client.sendTransactionBatch({
+        calls: Array.isArray(transaction) ? transaction : [transaction],
+      });
 
       return hash as Hex;
     },

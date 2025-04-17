@@ -9,6 +9,7 @@ import { useSendTransaction } from '@/hooks/use-send-transaction';
 import { useGrindBalance } from '@/hooks/use-grind-balance';
 import { encodeFunctionData, formatUnits, parseUnits } from 'viem';
 import { abi, addresses } from '@/contracts/block-crash';
+import { abi as grindAbi, addresses as grindAddresses } from '@/contracts/grind';
 import {
   Select,
   SelectContent,
@@ -23,7 +24,7 @@ import { toast } from 'sonner';
 export const Betting: React.FC = () => {
   const { state } = useGame();
   const { sendTransaction } = useSendTransaction({
-    key: 'mint-grind',
+    key: 'place-bet',
   });
 
   const grind = useGrindBalance();
@@ -39,26 +40,30 @@ export const Betting: React.FC = () => {
 
     const bigAmount = parseUnits(amount, grind.data.decimals);
 
-    console.log('amount', amount);
-    console.log('bigAmount', bigAmount);
-    console.log('liquidity', state.liquidity);
-    console.log('multiplier', multiplier);
-
     if (bigAmount > BigInt(state.liquidity)) {
       toast.error('Bet too large', {
         description: `Your bet amount is larger than the current liquidity of the game.`,
       });
     }
 
-    // TODO: approve the tokens
-    sendTransaction({
-      to: addresses[abstractTestnet.id],
-      data: encodeFunctionData({
-        abi,
-        functionName: 'placeBet',
-        args: [bigAmount, BigInt(multiplier)],
-      }),
-    });
+    sendTransaction([
+      {
+        to: grindAddresses[abstractTestnet.id],
+        data: encodeFunctionData({
+          abi: grindAbi,
+          functionName: 'approve',
+          args: [addresses[abstractTestnet.id], bigAmount],
+        }),
+      },
+      {
+        to: addresses[abstractTestnet.id],
+        data: encodeFunctionData({
+          abi,
+          functionName: 'placeBet',
+          args: [bigAmount, BigInt(multiplier)],
+        }),
+      },
+    ]);
   }
 
   return (

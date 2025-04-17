@@ -1,11 +1,11 @@
 import { abi, addresses } from '@/contracts/grind';
-import { useGlobalWalletSignerAccount } from '@abstract-foundation/agw-react';
+import { useAbstractClient } from '@abstract-foundation/agw-react';
 import { Address, formatUnits } from 'viem';
 import { abstractTestnet } from 'viem/chains';
 import { useReadContracts } from 'wagmi';
 
 export function useGrindBalance() {
-  const { address } = useGlobalWalletSignerAccount();
+  const { data: client } = useAbstractClient();
 
   return useReadContracts({
     allowFailure: false,
@@ -14,7 +14,7 @@ export function useGrindBalance() {
         address: addresses[abstractTestnet.id],
         abi,
         functionName: 'balanceOf',
-        args: [address as Address],
+        args: [client?.account.address as Address],
       },
       {
         address: addresses[abstractTestnet.id],
@@ -28,7 +28,7 @@ export function useGrindBalance() {
       },
     ],
     query: {
-      enabled: !!address,
+      enabled: !!client,
       select(data) {
         const formatted = formatUnits(data[0], data[1]);
 

@@ -2,13 +2,13 @@
 
 import { useBalance } from 'wagmi';
 import { Badge } from './ui/badge';
-import { useGlobalWalletSignerAccount } from '@abstract-foundation/agw-react';
+import { useAbstractClient } from '@abstract-foundation/agw-react';
 
 export const Balance: React.FC = () => {
-  const { address } = useGlobalWalletSignerAccount();
+  const { data: client } = useAbstractClient();
 
   const balance = useBalance({
-    address,
+    address: client?.account?.address,
   });
 
   return (
