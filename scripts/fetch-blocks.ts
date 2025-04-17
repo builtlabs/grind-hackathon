@@ -1,9 +1,9 @@
-import fs from "fs";
-import path from "path";
-import dotenv from "dotenv";
-import { createPublicClient, http } from "viem";
-import { mainnet } from "viem/chains";
-import { Network } from "alchemy-sdk";
+import fs from 'fs';
+import path from 'path';
+import dotenv from 'dotenv';
+import { createPublicClient, http } from 'viem';
+import { mainnet } from 'viem/chains';
+import { Network } from 'alchemy-sdk';
 
 dotenv.config();
 

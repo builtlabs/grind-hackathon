@@ -1,5 +1,5 @@
-import { fallback, http, createPublicClient as cpc } from 'viem';
-import type { Chain, FallbackTransport, PublicClient } from 'viem';
+import { fallback, http, createPublicClient as cpc, createWalletClient as cwc } from 'viem';
+import type { Account, Chain, FallbackTransport, PublicClient, WalletClient } from 'viem';
 import { chains } from './chain';
 
 export const transports = chains.reduce<Record<number, FallbackTransport>>((acc, chain) => {
@@ -15,5 +15,16 @@ export function createPublicClient<T extends Chain>(chain: T): PublicClient<Fall
   return cpc({
     chain,
     transport: transports[chain.id],
+  });
+}
+
+export function createWalletClient<T extends Chain>(
+  chain: T,
+  account: Account
+): WalletClient<FallbackTransport, T> {
+  return cwc({
+    chain,
+    transport: transports[chain.id],
+    account,
   });
 }

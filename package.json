@@ -12,7 +12,8 @@
     "graph:compile": "graphql-codegen --config codegen.ts",
     "graph:watch": "graphql-codegen -w",
     "script:blocks": "ts-node scripts/fetch-blocks.ts",
-    "script:thresholds": "ts-node scripts/optimise-thresholds.ts"
+    "script:thresholds": "ts-node scripts/optimise-thresholds.ts",
+    "script:master-key": "ts-node scripts/master-key.ts"
   },
   "dependencies": {
     "@account-kit/infra": "^4.26.0",
