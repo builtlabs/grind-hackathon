@@ -63,13 +63,6 @@ function generateNonce(): string {
     .replace(/=+$/, '');
 }
 
-function sanitizeCallbackUrl(callbackUrl: string, origin: string): string {
-  if (!callbackUrl.startsWith(origin)) {
-    return `${origin}/`;
-  }
-  return callbackUrl;
-}
-
 export function middleware(req: NextRequest) {
   const { pathname, search, origin, basePath, searchParams } = req.nextUrl;
   const cookieAuthToken = req.cookies.get('privy-token');
@@ -93,18 +86,6 @@ export function middleware(req: NextRequest) {
     const redirectUrl = new URL(`${basePath}/refresh`, origin);
     redirectUrl.searchParams.append('callbackUrl', `${basePath}${pathname}${search}`);
     return redirectWithCSP(nonce, redirectUrl);
-  }
-
-  const protectedPaths = ['/profile'];
-  if (!definitelyAuthenticated && !maybeAuthenticated && protectedPaths.includes(pathname)) {
-    const redirectUrl = new URL(`${basePath}/signin`, origin);
-    redirectUrl.searchParams.append('callbackUrl', `${basePath}${pathname}${search}`);
-    return redirectWithCSP(nonce, redirectUrl);
-  }
-
-  if (definitelyAuthenticated && pathname.startsWith('/signin')) {
-    const callbackUrl = sanitizeCallbackUrl(searchParams.get('callbackUrl') ?? '', origin);
-    return redirectWithCSP(nonce, new URL(callbackUrl));
   }
 
   return nextWithCSP(req, nonce);

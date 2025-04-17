@@ -7,12 +7,15 @@
 - Use the contract from Francis
 - Remove the GraphQL code if its not needed
 
-## Domain
-- Register the domain
-- Set up the domain with Vercel
+## Privy
 - Set up the domain with Privy
   - Verify the domain with Privy
   - DNS config
+- Project name
+
+## Domain
+- Register the domain
+- Set up the domain with Vercel
 - Make sure CSP is correct
 
 ## UI
@@ -25,9 +28,6 @@
 - Auto betting by approving a total pot, such as $25 for 10 rounds
 - Use the Privy [Server Sessions](https://docs.privy.io/wallets/using-wallets/server-sessions/overview) to reduce the pop-ups
   - does the max spend limit make this useless?
-
-## Auth
-- Sign in with Abstract wallet, all thats needed?
 
 ## Documentation
 - Site metadata

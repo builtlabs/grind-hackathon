@@ -19,7 +19,7 @@ const Page: NextPage<PageProps> = (props: PageProps) => {
       const accessToken = await getAccessToken();
 
       if (!accessToken) {
-        router.replace(`/signin?callbackUrl=${encodeURIComponent(callbackUrl ?? '/')}`);
+        router.replace(`/?callbackUrl=${encodeURIComponent(callbackUrl ?? '/')}`);
       } else {
         router.replace(callbackUrl ?? '/');
       }

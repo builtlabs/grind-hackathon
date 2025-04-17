@@ -25,7 +25,7 @@ export const AbstractLogin: React.FC<Omit<ComponentProps<typeof Button>, 'childr
       type="button"
       {...props}
     >
-      Login with Abstract
+      Connect Abstract
     </Button>
   );
 };

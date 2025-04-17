@@ -1,27 +1,28 @@
 'use client';
 
-import { usePrivy } from '@privy-io/react-auth';
+import { CrossAppAccountWithMetadata, usePrivy } from '@privy-io/react-auth';
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
-import Link from 'next/link';
+import { AbstractLogin } from './abstract';
+import { Address, Hex } from 'viem';
+import { ABSTRACT_APP_ID } from '@/lib/abstract';
+
+export function shorthandHex(hex?: Hex, length = 4): string {
+  return hex ? `${hex.slice(0, length + 2)}...${hex.slice(-length)}` : '';
+}
 
 export const AuthButton: React.FC<{
   className?: string;
 }> = ({ className }) => {
-  const { ready, authenticated } = usePrivy();
+  const { user, ready, authenticated } = usePrivy();
 
-  if (!authenticated) {
-    return (
-      <Button
-        className={cn('w-44', className)}
-        disabled={!ready || authenticated}
-        type="button"
-        asChild
-      >
-        <Link href="/signin">Sign In</Link>
-      </Button>
-    );
+  if (!authenticated || !user) {
+    return <AbstractLogin className={cn('w-44', className)} />;
   }
+
+  const account = user.linkedAccounts.find(
+    account => account.type === 'cross_app' && account.providerApp.id === ABSTRACT_APP_ID
+  ) as CrossAppAccountWithMetadata;
 
   return (
     <Button
@@ -29,9 +30,8 @@ export const AuthButton: React.FC<{
       disabled={!ready || authenticated}
       type="button"
       variant="outline"
-      asChild
     >
-      <Link href="/profile">Profile</Link>
+      {shorthandHex(account.embeddedWallets[0].address as Address)}
     </Button>
   );
 };
