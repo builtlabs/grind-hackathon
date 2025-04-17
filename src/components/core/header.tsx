@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { AuthButton } from '../auth/button';
 import { SystemStatus } from '../system-status';
+import { Balance } from '../balance';
 
 export const Header: React.FC = () => {
   return (
@@ -13,6 +14,7 @@ export const Header: React.FC = () => {
 
       <div className="flex items-center gap-2 md:gap-4">
         <SystemStatus className="hidden md:flex" />
+        <Balance />
         <AuthButton />
       </div>
     </header>

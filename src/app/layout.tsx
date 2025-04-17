@@ -11,6 +11,7 @@ import { Footer } from '@/components/core/footer';
 import { ThemeSwitch } from '@/components/theme-switch';
 import { WagmiProvider } from '@/components/providers/wagmi';
 import { BlockProvider } from '@/components/providers/block';
+import { Toaster } from '@/components/ui/sonner';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -60,6 +61,7 @@ export default async function RootLayout({
               </PrivyProvider>
             </QueryProvider>
           </WagmiProvider>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>
