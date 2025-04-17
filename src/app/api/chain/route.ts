@@ -48,6 +48,14 @@ export async function POST(request: Request) {
     `/api/game?blockNumber=${data.event.data.block.number}`
   );
 
+  console.log(
+    `🔍 Current game state: ${JSON.stringify({
+      block: data.event.data.block.number,
+      start: state.start,
+      end: state.end,
+    })}`
+  );
+
   if (state.end === data.event.data.block.number) {
     console.log(`🏁 Game ended at block ${data.event.data.block.number}`);
 

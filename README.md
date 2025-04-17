@@ -1,8 +1,5 @@
 # TODO
 
-## Infrastructure
-- Alchemy chain webhook for resetting the game
-
 ## Privy
 - Set up the domain with Privy
   - Verify the domain with Privy
