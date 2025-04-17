@@ -22,6 +22,9 @@ export async function fetcher<T>(url: string, init?: RequestInit): Promise<T> {
       }
     });
 
+    // Remove content-length header if it exists
+    finalHeaders.delete('content-length');
+
     res = await fetch(urlObj.toString(), {
       ...init,
       headers: finalHeaders,
