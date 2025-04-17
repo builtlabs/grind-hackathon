@@ -4,6 +4,8 @@ import { cn } from '@/lib/utils';
 import { useGame } from '../providers/game';
 import { useBlock } from '../providers/block';
 import { useEffect, useState } from 'react';
+import { ContractState } from '@/app/api/game/types';
+import { multipliers } from '@/lib/block-crash';
 
 interface BlockInfo {
   number: number;
@@ -11,41 +13,61 @@ interface BlockInfo {
   result: 'ok' | 'crash' | 'none';
 }
 
-function generateBlock(number: number): BlockInfo {
-  const rnd = Math.floor(Math.random() * 100) + 1;
+function createBlock(number: number, state?: ContractState): BlockInfo {
+  if (!state) {
+    return {
+      number,
+      multiplier: 0,
+      result: 'none',
+    };
+  }
+
+  const end = state.end || state.start + multipliers.length;
+
+  if (state.start <= number && number < end) {
+    return {
+      number,
+      multiplier: multipliers[number - state.start],
+      result: 'ok',
+    };
+  }
+
+  if (number === end) {
+    return {
+      number,
+      multiplier: multipliers[number - state.start],
+      result: 'crash',
+    };
+  }
+
   return {
     number,
-    multiplier: rnd,
-    result: rnd > 50 ? 'ok' : rnd > 20 ? 'crash' : 'none',
+    multiplier: 0,
+    result: 'none',
   };
 }
 
 export const GameBlock: React.FC = () => {
   const { number } = useBlock();
   const [blocks, setBlocks] = useState<BlockInfo[]>([]);
-  useGame();
+  const { state } = useGame();
 
   useEffect(() => {
     if (!number) {
       return;
     }
 
-    setBlocks(current => {
+    setBlocks(() => {
       const newBlocks: BlockInfo[] = [];
 
       for (let i = 0; i < 5; i++) {
         const blockNumber = number + i - 2;
-        const block = current.find(b => b.number === blockNumber);
-        if (block) {
-          newBlocks.push(block);
-        } else {
-          newBlocks.push(generateBlock(blockNumber));
-        }
+        newBlocks.push(createBlock(blockNumber, state));
       }
 
       return newBlocks;
     });
-  }, [number]);
+  }, [number, state]);
 
   return (
     <div className="flex flex-col gap-11 py-5">
@@ -80,7 +102,7 @@ const Block: React.FC<BlockProps> = ({ block, index }) => {
         index === 4 && '-z-20 scale-0',
         block.result === 'ok' && 'border-[#269418] bg-[#196622]',
         block.result === 'crash' && 'border-[#941818] bg-[#5E0C0D]',
-        block.result === 'none' && 'border-[#444] bg-[#1d1d1d]'
+        block.result === 'none' && 'bg-muted'
       )}
     >
       <p className="text-xl font-bold opacity-70">#{block.number}</p>

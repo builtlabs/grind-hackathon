@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Table,
   TableBody,
@@ -7,8 +9,30 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import Image from 'next/image';
+import { useGame } from '../providers/game';
+import { multipliers } from '@/lib/block-crash';
+import { cn } from '@/lib/utils';
+import { useBlock } from '../providers/block';
+
+function stillAlive(
+  bet: { cashoutIndex: number },
+  state: { start: number; end?: number }
+): boolean {
+  return !state.end || state.start + bet.cashoutIndex < state.end;
+}
+
+function stillGrinding(
+  bet: { cashoutIndex: number },
+  state: { start: number; end?: number },
+  blockNumber: number
+): boolean {
+  return !state.end && state.start + bet.cashoutIndex > blockNumber;
+}
 
 export const GameTable: React.FC = () => {
+  const { number } = useBlock();
+  const { state } = useGame();
+
   return (
     <div className="flex flex-col">
       <div className="flex items-center gap-6 font-semibold">
@@ -22,34 +46,17 @@ export const GameTable: React.FC = () => {
             unoptimized
           />
           <div className="flex flex-col">
-            <span className="text-muted-foreground">Total Bank</span>
-            <span>$100,000</span>
+            <span className="text-muted-foreground">Grind Bet</span>
+            <span>{state?.bets.reduce((a, b) => a + BigInt(b.amount), BigInt(0))}</span>
           </div>
         </div>
-        <div className="flex items-center gap-4">
-          <Image
-            src="https://grind.bearish.af/grindcoin.gif"
-            width={540}
-            height={540}
-            alt="grindcoin"
-            className="size-8"
-            unoptimized
-          />
-          <div className="flex flex-col">
-            <span className="text-muted-foreground">Players</span>
-            <span>20,237</span>
-          </div>
+        <div className="flex flex-col">
+          <span className="text-muted-foreground">Bets</span>
+          <span>{state?.bets.length}</span>
         </div>
-        <div className="flex items-center gap-4">
-          <Image
-            src="https://grind.bearish.af/grindcoin.gif"
-            width={540}
-            height={540}
-            alt="grindcoin"
-            className="size-8"
-            unoptimized
-          />
-          <span className="text-muted-foreground text-base font-bold">Fair Game</span>
+        <div className="flex flex-col">
+          <span className="text-muted-foreground">Still Grinding</span>
+          <span>{state?.bets.filter(bet => stillGrinding(bet, state, number)).length}</span>
         </div>
       </div>
       <div className="w-full overflow-hidden">
@@ -63,14 +70,20 @@ export const GameTable: React.FC = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {Array.from({ length: 15 }, (_, i) => (
-              <TableRow key={i}>
-                <TableCell>{`0x${i}`}</TableCell>
-                <TableCell>$100</TableCell>
-                <TableCell>2x</TableCell>
-                <TableCell>--</TableCell>
-              </TableRow>
-            ))}
+            {state?.bets.map((bet, i) => {
+              const profit = BigInt(bet.amount) * BigInt(multipliers[bet.cashoutIndex]);
+              const crashed = !stillAlive(bet, state);
+              return (
+                <TableRow key={i}>
+                  <TableCell>{bet.user}</TableCell>
+                  <TableCell>{bet.amount}</TableCell>
+                  <TableCell>{multipliers[bet.cashoutIndex]}x</TableCell>
+                  <TableCell className={cn(crashed ? 'text-red-500' : 'text-green-500')}>
+                    {profit}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>

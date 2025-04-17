@@ -1,18 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { publicClient } from '@/server/viem';
-import { abi, addresses } from '@/contracts/moon-sheep';
+import { abi, addresses } from '@/contracts/block-crash';
 import { abstractTestnet } from 'viem/chains';
 import { unstable_cache as cache } from 'next/cache';
+import { ContractState } from './types';
 
 const getState = cache(
-  (blockNumber: number) => {
+  async (blockNumber: number): Promise<ContractState> => {
     console.log('Fetching state from contract...', blockNumber);
-    return publicClient.readContract({
-      abi,
-      address: addresses[abstractTestnet.id],
-      functionName: 'owner',
-      blockNumber: BigInt(blockNumber),
-    });
+    const [[start, end, liquidity], history, bets] = await Promise.all([
+      publicClient.readContract({
+        abi,
+        address: addresses[abstractTestnet.id],
+        functionName: 'getRoundInfo',
+        blockNumber: BigInt(blockNumber),
+      }),
+      publicClient.readContract({
+        abi,
+        address: addresses[abstractTestnet.id],
+        functionName: 'getHistory',
+        args: [6n],
+      }),
+      publicClient.readContract({
+        abi,
+        address: addresses[abstractTestnet.id],
+        functionName: 'getBets',
+      }),
+    ]);
+
+    return {
+      start: Number(start),
+      end: Number(end),
+      liquidity: liquidity.toString(),
+      history,
+      bets: bets.map(bet => ({
+        user: bet.user,
+        amount: bet.amount.toString(),
+        cashoutIndex: Number(bet.cashoutIndex),
+      })),
+    };
   },
   ['contract-state'],
   {

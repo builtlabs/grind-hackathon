@@ -1,4 +1,11 @@
-import { ReadContractReturnType } from 'viem';
-import { type abi } from '@/contracts/moon-sheep';
-
-export type ContractState = ReadContractReturnType<typeof abi, 'owner'>;
+export type ContractState = {
+  start: number;
+  end: number;
+  liquidity: string;
+  history: readonly number[];
+  bets: {
+    user: `0x${string}`;
+    amount: string;
+    cashoutIndex: number;
+  }[];
+};
