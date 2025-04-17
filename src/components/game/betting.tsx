@@ -25,11 +25,11 @@ import { useBlock } from '../providers/block';
 export const Betting: React.FC = () => {
   const { number } = useBlock();
   const { state } = useGame();
+  const grind = useGrindBalance();
   const { sendTransaction } = useSendTransaction({
     key: 'place-bet',
+    onSuccess: grind.refetch,
   });
-
-  const grind = useGrindBalance();
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -87,8 +87,7 @@ export const Betting: React.FC = () => {
 
       {state?.end && number ? (
         <h3>
-          Round ended at block <strong>{state.end}</strong> with a multiplier of{' '}
-          <strong>{formatUnits(multipliers[state.end - state.start], 6)}x</strong>
+          Round ended at block <strong>{state.end}</strong>
         </h3>
       ) : null}
 
@@ -136,7 +135,7 @@ export const Betting: React.FC = () => {
         <Button
           className="mt-4 w-full"
           type="submit"
-          disabled={state?.start && number ? state?.start > number : false}
+          disabled={state?.start && number ? state?.start <= number : false}
         >
           Place Bet
         </Button>

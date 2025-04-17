@@ -63,7 +63,7 @@ export const GameBlock: React.FC = () => {
       const newBlocks: BlockInfo[] = [];
 
       for (let i = 0; i < 5; i++) {
-        const blockNumber = number + i - 2;
+        const blockNumber = number + i - 3;
         newBlocks.push(createBlock(blockNumber, state));
       }
 
@@ -113,7 +113,9 @@ const Block: React.FC<BlockProps> = ({ block, index }) => {
       )}
     >
       <p className="text-xl font-bold opacity-70">#{block.number}</p>
-      <p className="absolute top-1/2 -translate-y-1/2 text-4xl font-bold">{block.multiplier}x</p>
+      <p className="absolute top-1/2 -translate-y-1/2 text-4xl font-bold">
+        {formatUnits(block.multiplier, 6)}x
+      </p>
     </div>
   );
 };
