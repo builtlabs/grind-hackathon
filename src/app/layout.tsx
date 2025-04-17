@@ -46,11 +46,13 @@ export default async function RootLayout({
           disableTransitionOnChange
           nonce={nonce}
         >
-          <MatrixRainBackground />
           <AbstractWalletWrapper nonce={nonce}>
             <BlockProvider>
               <Header />
-              <div className="flex h-[calc(100vh-4rem)] flex-col overflow-hidden">{children}</div>
+              <div className="relative flex h-[calc(100vh-4rem)] flex-col overflow-hidden">
+                <MatrixRainBackground />
+                {children}
+              </div>
             </BlockProvider>
             <Footer />
             <ThemeSwitch className="fixed right-10 bottom-10 z-50 hidden xl:flex" />

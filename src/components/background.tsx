@@ -68,7 +68,7 @@ const MatrixRainBackground: React.FC = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="pointer-events-none fixed top-0 left-0 -z-10 h-screen w-screen"
+      className="pointer-events-none absolute inset-0 -z-10"
       style={{
         WebkitMaskImage: 'radial-gradient(ellipse at center, #0000001A 50%, black)',
         maskImage: 'radial-gradient(ellipse at center, #0000001A 50%, black)',
