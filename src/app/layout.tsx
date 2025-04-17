@@ -4,14 +4,12 @@ import './globals.css';
 import { headers } from 'next/headers';
 import { ThemeProvider } from '@/components/providers/theme';
 import { THEME_COOKIE_KEY } from '@/lib/cookies';
-import { QueryProvider } from '@/components/providers/query';
-import PrivyProvider from '@/components/providers/privy';
 import { Header } from '@/components/core/header';
 import { Footer } from '@/components/core/footer';
 import { ThemeSwitch } from '@/components/theme-switch';
-import { WagmiProvider } from '@/components/providers/wagmi';
 import { BlockProvider } from '@/components/providers/block';
 import { Toaster } from '@/components/ui/sonner';
+import { AbstractWalletWrapper } from '@/components/providers/abstract';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -47,20 +45,14 @@ export default async function RootLayout({
           disableTransitionOnChange
           nonce={nonce}
         >
-          <WagmiProvider>
-            <QueryProvider nonce={nonce}>
-              <PrivyProvider>
-                <BlockProvider>
-                  <Header />
-                  <div className="flex h-[calc(100vh-4rem)] flex-col overflow-hidden">
-                    {children}
-                  </div>
-                </BlockProvider>
-                <Footer />
-                <ThemeSwitch className="fixed right-10 bottom-10 z-50 hidden xl:flex" />
-              </PrivyProvider>
-            </QueryProvider>
-          </WagmiProvider>
+          <AbstractWalletWrapper nonce={nonce}>
+            <BlockProvider>
+              <Header />
+              <div className="flex h-[calc(100vh-4rem)] flex-col overflow-hidden">{children}</div>
+            </BlockProvider>
+            <Footer />
+            <ThemeSwitch className="fixed right-10 bottom-10 z-50 hidden xl:flex" />
+          </AbstractWalletWrapper>
           <Toaster />
         </ThemeProvider>
       </body>

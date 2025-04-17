@@ -9,7 +9,7 @@ import { multipliers } from '@/lib/block-crash';
 
 interface BlockInfo {
   number: number;
-  multiplier: number;
+  multiplier: bigint;
   result: 'ok' | 'crash' | 'none';
 }
 
@@ -17,7 +17,7 @@ function createBlock(number: number, state?: ContractState): BlockInfo {
   if (!state) {
     return {
       number,
-      multiplier: 0,
+      multiplier: 0n,
       result: 'none',
     };
   }
@@ -42,7 +42,7 @@ function createBlock(number: number, state?: ContractState): BlockInfo {
 
   return {
     number,
-    multiplier: 0,
+    multiplier: 0n,
     result: 'none',
   };
 }

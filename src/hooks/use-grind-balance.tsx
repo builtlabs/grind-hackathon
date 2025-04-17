@@ -1,15 +1,11 @@
 import { abi, addresses } from '@/contracts/grind';
-import { ABSTRACT_APP_ID } from '@/lib/abstract';
-import { CrossAppAccountWithMetadata, usePrivy } from '@privy-io/react-auth';
+import { useGlobalWalletSignerAccount } from '@abstract-foundation/agw-react';
 import { Address, formatUnits } from 'viem';
 import { abstractTestnet } from 'viem/chains';
 import { useReadContracts } from 'wagmi';
 
 export function useGrindBalance() {
-  const { user } = usePrivy();
-  const account = user?.linkedAccounts.find(
-    account => account.type === 'cross_app' && account.providerApp.id === ABSTRACT_APP_ID
-  ) as CrossAppAccountWithMetadata | undefined;
+  const { address } = useGlobalWalletSignerAccount();
 
   return useReadContracts({
     allowFailure: false,
@@ -18,7 +14,7 @@ export function useGrindBalance() {
         address: addresses[abstractTestnet.id],
         abi,
         functionName: 'balanceOf',
-        args: [account?.embeddedWallets[0].address as Address],
+        args: [address as Address],
       },
       {
         address: addresses[abstractTestnet.id],
@@ -32,7 +28,7 @@ export function useGrindBalance() {
       },
     ],
     query: {
-      enabled: !!account,
+      enabled: !!address,
       select(data) {
         const formatted = formatUnits(data[0], data[1]);
 

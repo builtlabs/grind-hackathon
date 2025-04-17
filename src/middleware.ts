@@ -1,4 +1,3 @@
-import { type NextURL } from 'next/dist/server/web/next-url';
 import { type NextRequest, NextResponse } from 'next/server';
 import { env } from './env.mjs';
 import { type CspDirective } from './csp/types';
@@ -45,15 +44,6 @@ async function nextWithCSP(req: NextRequest, nonce: string) {
   return response;
 }
 
-async function redirectWithCSP(nonce: string, redirectUrl: string | NextURL | URL) {
-  const cspHeaderValue = await cspHeader(nonce);
-  const response = NextResponse.redirect(redirectUrl);
-  response.headers.set('Content-Security-Policy', cspHeaderValue);
-  response.headers.set('X-Frame-Options', 'DENY');
-
-  return response;
-}
-
 function generateNonce(): string {
   const array = new Uint8Array(16);
   crypto.getRandomValues(array);
@@ -64,29 +54,7 @@ function generateNonce(): string {
 }
 
 export function middleware(req: NextRequest) {
-  const { pathname, search, origin, basePath, searchParams } = req.nextUrl;
-  const cookieAuthToken = req.cookies.get('privy-token');
-  const cookieSession = req.cookies.get('privy-session');
   const nonce = generateNonce();
-
-  if (searchParams.get('privy_oauth_code')) {
-    // Bypass CSP for OAuth callback
-    return nextWithCSP(req, nonce);
-  }
-
-  if (pathname === '/refresh') {
-    // Prevent infinite redirect loop
-    return nextWithCSP(req, nonce);
-  }
-
-  const definitelyAuthenticated = Boolean(cookieAuthToken);
-  const maybeAuthenticated = Boolean(cookieSession);
-
-  if (!definitelyAuthenticated && maybeAuthenticated) {
-    const redirectUrl = new URL(`${basePath}/refresh`, origin);
-    redirectUrl.searchParams.append('callbackUrl', `${basePath}${pathname}${search}`);
-    return redirectWithCSP(nonce, redirectUrl);
-  }
 
   return nextWithCSP(req, nonce);
 }

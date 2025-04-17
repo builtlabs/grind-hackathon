@@ -1,15 +1,8 @@
-import { ABSTRACT_APP_ID } from '@/lib/abstract';
-import {
-  CrossAppAccountWithMetadata,
-  UnsignedTransactionRequest,
-  useCrossAppAccounts,
-  usePrivy,
-} from '@privy-io/react-auth';
+import { useAbstractClient } from '@abstract-foundation/agw-react';
 import { useMutation } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
-import { Hex } from 'viem';
-import { abstractTestnet } from 'viem/chains';
+import { Account, Chain, Hex, SendTransactionParameters } from 'viem';
 import { useTransactionReceipt } from 'wagmi';
 
 interface Options {
@@ -18,17 +11,12 @@ interface Options {
 }
 
 export function useSendTransaction(options: Options) {
-  const { user } = usePrivy();
-  const { sendTransaction } = useCrossAppAccounts();
-
-  const account = user?.linkedAccounts.find(
-    account => account.type === 'cross_app' && account.providerApp.id === ABSTRACT_APP_ID
-  ) as CrossAppAccountWithMetadata | undefined;
+  const { data: client, isPending, error } = useAbstractClient();
 
   const transaction = useMutation({
     mutationKey: [options.key],
-    mutationFn: async (transaction: UnsignedTransactionRequest) => {
-      if (!account) {
+    mutationFn: async (transaction: SendTransactionParameters<Chain, Account>) => {
+      if (isPending) {
         toast.error('Connect Abstract', {
           id: options.key,
           description: 'You need to connect your Abstract wallet to send transactions.',
@@ -36,15 +24,15 @@ export function useSendTransaction(options: Options) {
         return;
       }
 
-      const hash = await sendTransaction(
-        {
-          ...transaction,
-          chainId: abstractTestnet.id,
-        },
-        {
-          address: account.embeddedWallets[0].address,
-        }
-      );
+      if (error || !client) {
+        toast.error('Abstract Error', {
+          id: options.key,
+          description: 'There was an error connecting to your Abstract wallet.',
+        });
+        return;
+      }
+
+      const hash = await client.sendTransaction(transaction);
 
       return hash as Hex;
     },
