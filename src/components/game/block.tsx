@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { ContractState } from '@/app/api/game/types';
 import { multipliers } from '@/lib/block-crash';
 import { formatUnits } from 'viem';
+import { Badge } from '../ui/badge';
 
 interface BlockInfo {
   number: number;
@@ -79,6 +80,11 @@ export const GameBlock: React.FC = () => {
       <div className="relative isolate mx-20 flex size-52 items-center">
         {blocks.map((block, index) => (
           <Block key={block.number} index={index} block={block} />
+        ))}
+      </div>
+      <div className="flex flex-row-reverse items-center gap-3">
+        {state?.history.map(result => (
+          <Badge key={result}>{formatUnits(BigInt(result), 6)}x</Badge>
         ))}
       </div>
     </div>
