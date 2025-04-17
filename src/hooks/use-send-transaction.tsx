@@ -24,6 +24,7 @@ export function useSendTransaction(options: Options) {
         toast.error('Connect Abstract', {
           id: options.key,
           description: 'You need to connect your Abstract wallet to send transactions.',
+          duration: 2000,
         });
         return;
       }
@@ -32,6 +33,7 @@ export function useSendTransaction(options: Options) {
         toast.error('Abstract Error', {
           id: options.key,
           description: 'There was an error connecting to your Abstract wallet.',
+          duration: 2000,
         });
         return;
       }
@@ -52,6 +54,7 @@ export function useSendTransaction(options: Options) {
       toast.error('Sending Transaction Failed', {
         id: options.key,
         description: 'There was an error sending the transaction.',
+        duration: 2000,
       });
     },
   });
@@ -64,16 +67,20 @@ export function useSendTransaction(options: Options) {
     if (mintReceipt.isSuccess) {
       toast.success('Transaction Success', {
         id: options.key,
+        duration: 2000,
       });
       options.onSuccess?.();
+      transaction.reset();
     }
 
     if (mintReceipt.isError) {
       toast.error('Transaction Failed', {
         id: options.key,
+        duration: 2000,
       });
+      transaction.reset();
     }
-  }, [mintReceipt.isSuccess, mintReceipt.isError, options]);
+  }, [mintReceipt.isSuccess, mintReceipt.isError, options, transaction]);
 
   return {
     sendTransaction: transaction.mutate,
