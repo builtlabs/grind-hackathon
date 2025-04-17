@@ -14,9 +14,9 @@ export function shorthandHex(hex?: Hex, length = 4): string {
 export const AuthButton: React.FC<{
   className?: string;
 }> = ({ className }) => {
-  const { user, ready, authenticated } = usePrivy();
+  const { user, ready, logout } = usePrivy();
 
-  if (!authenticated || !user) {
+  if (!user) {
     return <AbstractLogin className={cn('w-44', className)} />;
   }
 
@@ -27,9 +27,10 @@ export const AuthButton: React.FC<{
   return (
     <Button
       className={cn('w-44', className)}
-      disabled={!ready || authenticated}
       type="button"
       variant="outline"
+      disabled={!ready}
+      onClick={logout}
     >
       {shorthandHex(account.embeddedWallets[0].address as Address)}
     </Button>
