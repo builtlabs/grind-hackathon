@@ -1,10 +1,7 @@
 # TODO
 
 ## Infrastructure
-- Sending Transactions
-  - Wait for it to send
-  - Fetch new game state
-- Use the contract from Francis
+- Alchemy chain webhook for resetting the game
 - Remove the GraphQL code if its not needed
 
 ## Privy

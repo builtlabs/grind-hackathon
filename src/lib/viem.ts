@@ -21,7 +21,7 @@ export function createPublicClient<T extends Chain>(chain: T): PublicClient<Fall
 export function createWalletClient<T extends Chain>(
   chain: T,
   account: Account
-): WalletClient<FallbackTransport, T> {
+): WalletClient<FallbackTransport, T, Account> {
   return cwc({
     chain,
     transport: transports[chain.id],
