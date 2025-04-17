@@ -24,7 +24,21 @@ const MatrixRainBackground: React.FC = () => {
 
     const hexChars = '0123456789ABCDEF';
 
-    const draw = () => {
+    let lastTime = performance.now();
+    let progress = 0;
+    const speed = 50; // TODO: change speed depending on the game state
+    const draw = (time: DOMHighResTimeStamp) => {
+      const delta = time - lastTime;
+      lastTime = time;
+      progress += delta;
+
+      if (progress < speed) {
+        requestAnimationFrame(draw);
+        return;
+      } else {
+        progress = 0;
+      }
+
       // Fade the previous frame for a trail effect
       ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
       ctx.fillRect(0, 0, width, height);
@@ -51,7 +65,7 @@ const MatrixRainBackground: React.FC = () => {
       requestAnimationFrame(draw);
     };
 
-    draw();
+    draw(lastTime);
 
     // Handle window resizing
     const handleResize = () => {
