@@ -6,10 +6,10 @@ import { GameProvider } from '@/components/providers/game';
 export default function Home() {
   return (
     <GameProvider>
-      <main className="container flex h-full w-full justify-center gap-20 py-32">
-        <Betting />
+      <main className="container flex h-full w-full flex-col justify-between py-20 lg:flex-row lg:py-32">
+        <Betting className="order-1 lg:order-none" />
         <GameBlock />
-        <GameTable />
+        <GameTable className="order-2 lg:order-none" />
       </main>
     </GameProvider>
   );

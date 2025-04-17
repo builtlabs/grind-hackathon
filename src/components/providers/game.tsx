@@ -21,6 +21,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     placeholderData: (previousValue: ContractState | undefined) => {
       return previousValue;
     },
+    enabled: !!number,
   });
 
   return <GameContext.Provider value={{ state: game.data }}>{children}</GameContext.Provider>;

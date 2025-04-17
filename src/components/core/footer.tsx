@@ -7,7 +7,7 @@ export const Footer: React.FC = () => {
       <div className="container mx-auto my-12 flex flex-col items-center justify-between gap-10 px-10 sm:flex-row sm:items-start">
         <div className="flex flex-col items-start gap-5">
           <Link href="/" className="text-xl font-bold uppercase">
-            RED BLOCK GREEN BLOCK
+            HASHCRASH
           </Link>
           <div className="flex items-center justify-start gap-2">
             <Link

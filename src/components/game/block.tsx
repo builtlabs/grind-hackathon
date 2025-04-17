@@ -3,7 +3,7 @@
 import { cn } from '@/lib/utils';
 import { useGame } from '../providers/game';
 import { useBlock } from '../providers/block';
-import { useEffect, useState } from 'react';
+import { ComponentProps, useEffect, useState } from 'react';
 import { ContractState } from '@/app/api/game/types';
 import { multipliers } from '@/lib/block-crash';
 import { formatUnits } from 'viem';
@@ -49,6 +49,15 @@ function createBlock(number: number, state?: ContractState): BlockInfo {
   };
 }
 
+function multiplierVariant(multiplier: number): ComponentProps<typeof Badge>['variant'] {
+  if (multiplier < 1) {
+    return 'destructive';
+  }
+
+  // TODO: Add more variants
+  return 'default';
+}
+
 export const GameBlock: React.FC = () => {
   const { number } = useBlock();
   const [blocks, setBlocks] = useState<BlockInfo[]>([]);
@@ -72,20 +81,27 @@ export const GameBlock: React.FC = () => {
   }, [number, state]);
 
   return (
-    <div className="flex flex-col gap-11 py-5">
+    <div className="flex flex-col items-center gap-11 py-5">
       <div className="flex flex-col items-center">
         <p className="text-base">Current Multiplier</p>
         <p className="text-7xl font-bold">{formatUnits(blocks[2]?.multiplier ?? 0n, 6)}x</p>
       </div>
-      <div className="relative isolate mx-20 flex size-52 items-center">
+      <div className="relative isolate mx-20 flex size-40 items-center">
         {blocks.map((block, index) => (
           <Block key={block.number} index={index} block={block} />
         ))}
       </div>
-      <div className="flex flex-row-reverse items-center gap-3">
-        {state?.history.map((result, index) => (
-          <Badge key={index}>{formatUnits(BigInt(result), 6)}x</Badge>
-        ))}
+      <div className="flex flex-row-reverse items-center justify-center gap-3">
+        {state?.history.map((result, index) => {
+          const multiplier = formatUnits(BigInt(result), 6);
+          const variant = multiplierVariant(Number(multiplier));
+
+          return (
+            <Badge key={index} variant={variant}>
+              {multiplier}x
+            </Badge>
+          );
+        })}
       </div>
     </div>
   );
@@ -100,7 +116,7 @@ const Block: React.FC<BlockProps> = ({ block, index }) => {
   return (
     <div
       className={cn(
-        'absolute flex size-52 flex-none flex-col items-center rounded border-4 p-4',
+        'absolute flex size-full flex-none flex-col items-center rounded border-4 p-4',
         'transition-all duration-1000 ease-in-out',
         index === 0 && '-z-20 scale-0',
         index === 1 && '-z-10 -translate-x-1/2 scale-80',

@@ -30,12 +30,16 @@ function stillGrinding(
   return !!blockNumber && !state.end && state.start + bet.cashoutIndex > blockNumber;
 }
 
-export const GameTable: React.FC = () => {
+interface GameTableProps {
+  className?: string;
+}
+
+export const GameTable: React.FC<GameTableProps> = ({ className }) => {
   const { number } = useBlock();
   const { state } = useGame();
 
   return (
-    <div className="flex flex-col">
+    <div className={cn('flex flex-col items-center', className)}>
       <div className="flex items-center gap-6 font-semibold">
         <div className="flex items-center gap-4">
           <Image
@@ -62,7 +66,7 @@ export const GameTable: React.FC = () => {
           <span>{state?.bets.filter(bet => stillGrinding(bet, state, number)).length}</span>
         </div>
       </div>
-      <div className="w-full overflow-hidden">
+      <div className="w-full max-w-sm overflow-hidden">
         <Table className="border-separate border-spacing-y-2">
           <TableHeader>
             <TableRow className="*:data-[slot=table-head]:h-6">

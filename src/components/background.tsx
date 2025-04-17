@@ -15,7 +15,7 @@ const MatrixRainBackground: React.FC = () => {
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
 
-    const fontSize = 16;
+    const fontSize = width < 640 ? 10 : 16;
     const columns = Math.floor(width / fontSize);
     let drops: number[] = Array.from(
       { length: columns },
@@ -57,6 +57,7 @@ const MatrixRainBackground: React.FC = () => {
     const handleResize = () => {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
+      const fontSize = width < 640 ? 10 : 16;
       const newColumns = Math.floor(width / fontSize);
       drops = Array.from({ length: newColumns }, () => (Math.random() * height) / fontSize);
     };
@@ -68,7 +69,7 @@ const MatrixRainBackground: React.FC = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="pointer-events-none absolute inset-0 -z-10"
+      className="pointer-events-none absolute inset-0 -z-10 h-full"
       style={{
         WebkitMaskImage: 'radial-gradient(ellipse at center, #0000001A 50%, black)',
         maskImage: 'radial-gradient(ellipse at center, #0000001A 50%, black)',

@@ -21,8 +21,13 @@ import { multipliers } from '@/lib/block-crash';
 import { useGame } from '../providers/game';
 import { toast } from 'sonner';
 import { useBlock } from '../providers/block';
+import { cn } from '@/lib/utils';
 
-export const Betting: React.FC = () => {
+interface BettingProps {
+  className?: string;
+}
+
+export const Betting: React.FC<BettingProps> = ({ className }) => {
   const { number } = useBlock();
   const { state } = useGame();
   const grind = useGrindBalance();
@@ -69,7 +74,7 @@ export const Betting: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col">
+    <div className={cn('flex flex-col items-center', className)}>
       <h2 className="text-xl font-bold">Place a Bet</h2>
       {!state?.start && 'Place a bet to start the game'}
 

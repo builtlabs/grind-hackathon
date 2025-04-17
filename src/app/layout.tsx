@@ -49,7 +49,7 @@ export default async function RootLayout({
           <AbstractWalletWrapper nonce={nonce}>
             <BlockProvider>
               <Header />
-              <div className="relative -mt-16 flex h-screen flex-col overflow-hidden">
+              <div className="relative -mt-16 flex flex-col overflow-hidden lg:h-screen lg:pt-16">
                 <MatrixRainBackground />
                 {children}
               </div>
