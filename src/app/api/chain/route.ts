@@ -56,7 +56,7 @@ export async function POST(request: Request) {
     })}`
   );
 
-  if (state.end === data.event.data.block.number) {
+  if (state.end === data.event.data.block.number - 1) {
     console.log(`🏁 Game ended at block ${data.event.data.block.number}`);
 
     try {
