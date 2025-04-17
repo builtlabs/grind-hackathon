@@ -329,5 +329,5 @@ export const abi = [
 ] as const;
 
 export const addresses = {
-  [abstractTestnet.id]: '0x4379ef6254ac62F92B0dA1b0a2292c8970b0AC0a',
+  [abstractTestnet.id]: '0x28D947013e3a2485ce9eFF72F5eA5B383a1A179e',
 } as const;

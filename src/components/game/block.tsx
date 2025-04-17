@@ -6,6 +6,7 @@ import { useBlock } from '../providers/block';
 import { useEffect, useState } from 'react';
 import { ContractState } from '@/app/api/game/types';
 import { multipliers } from '@/lib/block-crash';
+import { formatUnits } from 'viem';
 
 interface BlockInfo {
   number: number;
@@ -73,7 +74,7 @@ export const GameBlock: React.FC = () => {
     <div className="flex flex-col gap-11 py-5">
       <div className="flex flex-col items-center">
         <p className="text-base">Current Multiplier</p>
-        <p className="text-7xl font-bold">{blocks[2]?.multiplier}x</p>
+        <p className="text-7xl font-bold">{formatUnits(blocks[2]?.multiplier ?? 0n, 6)}x</p>
       </div>
       <div className="relative isolate mx-20 flex size-52 items-center">
         {blocks.map((block, index) => (
