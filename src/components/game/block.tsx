@@ -77,6 +77,7 @@ interface BlockProps {
 const Block: React.FC<BlockProps> = ({ block, index }) => {
   return (
     <div
+      key={block.number}
       className={cn(
         'absolute flex size-full flex-none flex-col items-center rounded border-4 p-4',
         'transition-all duration-1000 ease-in-out',

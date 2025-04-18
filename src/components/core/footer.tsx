@@ -6,7 +6,14 @@ export const Footer: React.FC = () => {
     <footer className="border-border bg-background/70 w-full border-t">
       <div className="container mx-auto my-12 flex flex-col items-center justify-between gap-10 px-10 sm:flex-row sm:items-start">
         <div className="flex flex-col items-start gap-5">
-          <Link href="/" className="text-xl font-bold uppercase">
+          <Link href="/" className="flex items-center gap-1 text-xl font-bold uppercase">
+            <Image
+              src="/icon.png"
+              alt="Icon"
+              width={1024}
+              height={1024}
+              className="size-8 rounded-full"
+            />
             HASHCRASH
           </Link>
           <div className="flex items-center justify-start gap-2">

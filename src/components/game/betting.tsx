@@ -109,12 +109,12 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
       setEnded(true);
     }
 
-    if (ended && state.start === 0 && state.end === 0) {
+    if (ended && oldState) {
       // Game has been reset
       grind.refetch();
       setEnded(false);
     }
-  }, [state, number, ended, grind]);
+  }, [ended, grind, number, oldState, state]);
 
   return (
     <div className={cn('flex w-full flex-none flex-col gap-5 xl:w-xs', className)}>

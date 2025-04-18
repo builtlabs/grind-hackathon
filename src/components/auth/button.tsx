@@ -1,20 +1,14 @@
 'use client';
 
 import { Button } from '../ui/button';
-import { cn, shorthandHex } from '@/lib/utils';
-import {
-  useAbstractClient,
-  useGlobalWalletSignerAccount,
-  useLoginWithAbstract,
-} from '@abstract-foundation/agw-react';
-import { useDisconnect } from 'wagmi';
+import { cn } from '@/lib/utils';
+import { useGlobalWalletSignerAccount, useLoginWithAbstract } from '@abstract-foundation/agw-react';
+import { Account } from './account';
 
 export const AuthButton: React.FC<{
   className?: string;
 }> = ({ className }) => {
   const { status } = useGlobalWalletSignerAccount();
-  const { data: client } = useAbstractClient();
-  const { disconnect: logout } = useDisconnect();
   const { login } = useLoginWithAbstract();
 
   if (status !== 'connected') {
@@ -25,18 +19,5 @@ export const AuthButton: React.FC<{
     );
   }
 
-  function handleLogout() {
-    logout();
-  }
-
-  return (
-    <Button
-      className={cn('md:w-44', className)}
-      type="button"
-      variant="outline"
-      onClick={handleLogout}
-    >
-      {shorthandHex(client?.account.address)}
-    </Button>
-  );
+  return <Account className={className} />;
 };

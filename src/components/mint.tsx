@@ -29,7 +29,7 @@ export const Mint: React.FC<MintProps> = ({ onSuccess, disabled }) => {
     <Button
       variant="link"
       type="button"
-      className="ml-auto h-min p-0"
+      className="text-muted-foreground ml-auto h-min p-0 text-xs"
       size="sm"
       onClick={handleMint}
       disabled={disabled}
