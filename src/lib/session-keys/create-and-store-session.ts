@@ -4,6 +4,7 @@ import { LimitType, SessionConfig } from '@abstract-foundation/agw-client/sessio
 import { LOCAL_STORAGE_KEY_PREFIX } from './constants';
 import { getEncryptionKey } from './get-encryption-key';
 import { encrypt } from './encrypt-session';
+import { abi as blockCrashAbi, addresses as blockCrashAddresses } from '@/contracts/block-crash';
 import { abi as grindAbi, addresses as grindAddresses } from '@/contracts/grind';
 import { abstractTestnet } from 'viem/chains';
 
@@ -64,7 +65,18 @@ export const createAndStoreSession = async (
             target: grindAddresses[abstractTestnet.id],
             selector: toFunctionSelector(getAbiItem({ abi: grindAbi, name: 'mint' })),
             valueLimit: {
-              limitType: LimitType.Lifetime,
+              limitType: LimitType.Unlimited,
+              limit: BigInt(0),
+              period: BigInt(0),
+            },
+            maxValuePerUse: BigInt(0),
+            constraints: [],
+          },
+          {
+            target: blockCrashAddresses[abstractTestnet.id],
+            selector: toFunctionSelector(getAbiItem({ abi: blockCrashAbi, name: 'placeBet' })),
+            valueLimit: {
+              limitType: LimitType.Unlimited,
               limit: BigInt(0),
               period: BigInt(0),
             },
