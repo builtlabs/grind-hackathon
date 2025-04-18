@@ -39,8 +39,12 @@ const MatrixRainBackground: React.FC = () => {
   useEffect(() => {
     if (!state || !number) return;
 
-    if (state.end === number - 1 || state.start + multipliers.length - 1 === number) {
+    if (state.end === number - 1) {
       renderState.current.crashed = performance.now();
+      renderState.current.mode = 'idle';
+    }
+
+    if (state.start + multipliers.length - 1 === number) {
       renderState.current.mode = 'idle';
     }
 
