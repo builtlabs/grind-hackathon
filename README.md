@@ -1,12 +1,6 @@
 # TODO
 
-## Domain
-- Register the domain
-- Set up the domain with Vercel
-- Make sure CSP is correct
-
 ## UI
-- Incorporate the $GRIND assets
 - A nice shadcn theme
   - Use the $GRIND colors
 - Use the $GRIND font
