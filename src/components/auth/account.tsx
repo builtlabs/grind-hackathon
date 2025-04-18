@@ -11,7 +11,7 @@ import { useAbstractClient } from '@abstract-foundation/agw-react';
 import { useBalance, useDisconnect, useEnsAvatar, useEnsName } from 'wagmi';
 import { BlurredAvatar } from './avatar';
 import { ClipboardCopy, Fuel, LifeBuoy, LogOut } from 'lucide-react';
-import { shorthandHex } from '@/lib/utils';
+import { cn, shorthandHex } from '@/lib/utils';
 import { toast } from 'sonner';
 import { formatUnits } from 'viem';
 import Link from 'next/link';
@@ -49,7 +49,7 @@ export const Account: React.FC<{
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className={className}>
+      <DropdownMenuTrigger className={cn('rounded-full', className)}>
         <Avatar className="size-8">
           {avatar ? <AvatarImage src={avatar} /> : null}
           {client ? (
