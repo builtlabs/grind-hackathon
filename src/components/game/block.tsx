@@ -13,8 +13,16 @@ function multiplierVariant(multiplier: number): ComponentProps<typeof Badge>['va
     return 'destructive';
   }
 
+  if (multiplier === 1) {
+    return 'warning';
+  }
+
+  if (multiplier > 50) {
+    return 'special';
+  }
+
   // TODO: Add more variants
-  return 'default';
+  return 'constructive';
 }
 
 export const GameBlock: React.FC = () => {
