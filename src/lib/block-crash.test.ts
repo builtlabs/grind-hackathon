@@ -63,20 +63,51 @@ describe('Block crash tests', () => {
   });
 
   describe('stateCountdown', () => {
-    it('should return starting countdown state', () => {
-      const state = { start: 5, end: 0 };
-      const countdown = stateCountdown(2, state);
+    it('should return starting countdown max', () => {
+      const state = { start: 20, end: 0 };
+      const countdown = stateCountdown(1, state);
       expect(countdown).toEqual({
         type: 'starting',
-        countdown: 3,
-        target: 5,
+        countdown: 19,
+        target: 20,
       });
     });
 
-    it('should return ending countdown state', () => {
+    it('should return starting countdown state', () => {
+      const state = { start: 20, end: 0 };
+      const countdown = stateCountdown(10, state);
+      expect(countdown).toEqual({
+        type: 'starting',
+        countdown: 10,
+        target: 20,
+      });
+    });
+
+    it('should return starting countdown min', () => {
+      const state = { start: 20, end: 0 };
+      const countdown = stateCountdown(19, state);
+      expect(countdown).toEqual({
+        type: 'starting',
+        countdown: 1,
+        target: 20,
+      });
+    });
+
+    it('should return starting countdown max', () => {
       const state = { start: 5, end: 0 };
       const fixedEnd = state.start + multipliers.length - 1;
-      const countdown = stateCountdown(fixedEnd - 2, state);
+      const countdown = stateCountdown(5, state);
+      expect(countdown).toEqual({
+        type: 'ending',
+        countdown: 50,
+        target: fixedEnd,
+      });
+    });
+
+    it('should return ending countdown min', () => {
+      const state = { start: 5, end: 0 };
+      const fixedEnd = state.start + multipliers.length - 1;
+      const countdown = stateCountdown(fixedEnd - 1, state);
       expect(countdown).toEqual({
         type: 'ending',
         countdown: 2,
@@ -85,12 +116,13 @@ describe('Block crash tests', () => {
     });
 
     it('should return ended state', () => {
-      const state = { start: 5, end: 10 };
-      const countdown = stateCountdown(10, state);
+      const state = { start: 5, end: 0 };
+      const fixedEnd = state.start + multipliers.length - 1;
+      const countdown = stateCountdown(fixedEnd, state);
       expect(countdown).toEqual({
         type: 'ended',
         countdown: 0,
-        target: 10,
+        target: fixedEnd,
       });
     });
   });

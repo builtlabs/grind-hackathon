@@ -105,7 +105,7 @@ export function stateCountdown(
   number: number,
   state: Omit<ContractState, 'liquidity' | 'history' | 'bets'>
 ) {
-  if (state?.start && number && state?.start > number) {
+  if (state.start && number && state.start > number) {
     return {
       type: 'starting',
       countdown: state.start - number,
@@ -113,19 +113,21 @@ export function stateCountdown(
     } as const;
   }
 
-  if (!state?.end && state?.start && number && state?.start <= number) {
+  const end = state.end || state.start + multipliers.length - 1;
+
+  if (state.start && number && state.start <= number && number < end) {
     return {
       type: 'ending',
-      countdown: state.start + multipliers.length - 1 - number,
+      countdown: state.start + multipliers.length - number,
       target: state.start + multipliers.length - 1,
     } as const;
   }
 
-  if (state?.end && number) {
+  if (end === number) {
     return {
       type: 'ended',
       countdown: 0,
-      target: state.end,
+      target: end,
     } as const;
   }
 
