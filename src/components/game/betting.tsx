@@ -26,6 +26,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { useAbstractClient } from '@abstract-foundation/agw-react';
 import { MultiplierBadge } from './multiplier';
+import { Turbo } from '../turbo';
 
 interface BettingProps {
   className?: string;
@@ -183,13 +184,16 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
             </Select>
           </div>
 
-          <Button
-            className="mt-4 w-full"
-            type="submit"
-            disabled={!oldState && state?.start && number ? state?.start <= number : false}
-          >
-            Place Bet
-          </Button>
+          <div className="flex flex-col">
+            <Button
+              className="mt-4 w-full"
+              type="submit"
+              disabled={!oldState && state?.start && number ? state?.start <= number : false}
+            >
+              Place Bet
+            </Button>
+            <Turbo />
+          </div>
         </form>
       </div>
       <div
