@@ -7,6 +7,7 @@ import { ContractState } from '../game/types';
 import { walletClient } from '@/server/master';
 import { abi, addresses } from '@/contracts/block-crash';
 import { abstractTestnet } from 'viem/chains';
+import { multipliers } from '@/lib/block-crash';
 
 interface BodyShape {
   webhookId: string;
@@ -50,7 +51,9 @@ export async function POST(request: Request) {
     `/api/game?blockNumber=${data.event.data.block.number}`
   );
 
-  const crashed = state.end === data.event.data.block.number - 1;
+  const crashed =
+    state.end === data.event.data.block.number - 1 ||
+    data.event.data.block.number === state.start + multipliers.length - 1;
   console.log(
     `🔍 Current game state: ${JSON.stringify({
       block: data.event.data.block.number,

@@ -3,6 +3,7 @@
 import React, { useRef, useEffect } from 'react';
 import { useGame } from './providers/game';
 import { useBlock } from './providers/block';
+import { multipliers } from '@/lib/block-crash';
 
 interface RenderState {
   width: number;
@@ -38,7 +39,7 @@ const MatrixRainBackground: React.FC = () => {
   useEffect(() => {
     if (!state || !number) return;
 
-    if (state.end === number - 1) {
+    if (state.end === number - 1 || state.start + multipliers.length - 1 === number) {
       renderState.current.crashed = performance.now();
       renderState.current.mode = 'idle';
     }

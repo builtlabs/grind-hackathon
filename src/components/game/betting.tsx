@@ -105,7 +105,7 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
   useEffect(() => {
     if (!state || !number) return;
 
-    if (state.end === number - 1) {
+    if (state.end === number - 1 || state.start + multipliers.length - 1 === number) {
       setEnded(true);
     }
 
