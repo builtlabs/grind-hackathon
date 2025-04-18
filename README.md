@@ -4,9 +4,8 @@
 - A nice shadcn theme
   - Use the $GRIND colors
 - Use the $GRIND font
-
-## MVP+
-- Auto betting by approving a total pot, such as $25 for 10 rounds
+- Built labs rocket logo
+- Tidy the footer
 
 ## Documentation
 - open graph images
