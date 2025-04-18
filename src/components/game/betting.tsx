@@ -31,6 +31,7 @@ interface BettingProps {
 export const Betting: React.FC<BettingProps> = ({ className }) => {
   const { number } = useBlock();
   const { state } = useGame();
+  const [ended, setEnded] = useState(false);
   const grind = useGrindBalance();
   const { sendTransaction } = useSendTransaction({
     key: 'place-bet',
@@ -75,9 +76,18 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
   }
 
   useEffect(() => {
-    grind.refetch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state?.history.length]);
+    if (!state || !number) return;
+
+    if (state.end === number - 1) {
+      setEnded(true);
+    }
+
+    if (ended && state.start === 0 && state.end === 0) {
+      // Game has been reset
+      grind.refetch();
+      setEnded(false);
+    }
+  }, [state, number, ended, grind]);
 
   return (
     <div className={cn('flex flex-col items-center', className)}>
