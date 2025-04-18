@@ -8,11 +8,6 @@ export const abi = [
         name: 'grind_',
         type: 'address',
       },
-      {
-        internalType: 'address',
-        name: 'runner_',
-        type: 'address',
-      },
     ],
     stateMutability: 'nonpayable',
     type: 'constructor',
@@ -70,6 +65,11 @@ export const abi = [
   {
     inputs: [],
     name: 'RoundOverError',
+    type: 'error',
+  },
+  {
+    inputs: [],
+    name: 'RoundStartedError',
     type: 'error',
   },
   {
@@ -229,16 +229,16 @@ export const abi = [
     type: 'function',
   },
   {
-    inputs: [],
-    name: 'RUNNER',
-    outputs: [
+    inputs: [
       {
-        internalType: 'address',
-        name: '',
-        type: 'address',
+        internalType: 'uint256',
+        name: '_index',
+        type: 'uint256',
       },
     ],
-    stateMutability: 'view',
+    name: 'cancelBet',
+    outputs: [],
+    stateMutability: 'nonpayable',
     type: 'function',
   },
   {
@@ -275,8 +275,13 @@ export const abi = [
             name: 'cashoutIndex',
             type: 'uint64',
           },
+          {
+            internalType: 'bool',
+            name: 'cancelled',
+            type: 'bool',
+          },
         ],
-        internalType: 'struct BlockCrash.Bet[]',
+        internalType: 'struct HashCrash.Bet[]',
         name: '',
         type: 'tuple[]',
       },
@@ -311,8 +316,13 @@ export const abi = [
             name: 'cashoutIndex',
             type: 'uint64',
           },
+          {
+            internalType: 'bool',
+            name: 'cancelled',
+            type: 'bool',
+          },
         ],
-        internalType: 'struct BlockCrash.Bet[]',
+        internalType: 'struct HashCrash.Bet[]',
         name: '',
         type: 'tuple[]',
       },
@@ -361,7 +371,7 @@ export const abi = [
             type: 'uint256',
           },
         ],
-        internalType: 'struct BlockCrash.LiquidityDelta[]',
+        internalType: 'struct HashCrash.LiquidityDelta[]',
         name: '',
         type: 'tuple[]',
       },
