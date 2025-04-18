@@ -18,7 +18,6 @@
  *        key is incorrect or the data has been tampered with
  */
 export const decrypt = async (encryptedData: string, key: CryptoKey): Promise<string> => {
-  console.log('Decrypting data:', encryptedData);
   const { iv, data } = JSON.parse(encryptedData);
   const decrypted = await crypto.subtle.decrypt(
     { name: 'AES-GCM', iv: Buffer.from(iv, 'hex') },

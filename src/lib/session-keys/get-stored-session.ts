@@ -44,7 +44,6 @@ export const getStoredSession = async (
   session: SessionConfig;
   privateKey: Hex;
 } | null> => {
-  console.log('Getting stored session for address:', address);
   if (!address) return null;
 
   const encryptedData = localStorage.getItem(`${LOCAL_STORAGE_KEY_PREFIX}${address}`);

@@ -16,7 +16,6 @@
  *                           both encoded as hex strings
  */
 export const encrypt = async (data: string, key: CryptoKey): Promise<string> => {
-  console.log('Encrypting data:', data);
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const encrypted = await crypto.subtle.encrypt(
     { name: 'AES-GCM', iv },

@@ -44,7 +44,6 @@ export const createAndStoreSession = async (
   session: SessionConfig;
   privateKey: Address;
 } | null> => {
-  console.log('Creating session for address:', userAddress);
   if (!userAddress) return null;
 
   try {

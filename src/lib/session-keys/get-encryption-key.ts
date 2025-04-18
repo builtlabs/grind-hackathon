@@ -19,7 +19,6 @@ import type { Address } from 'viem';
  *                              used with the Web Crypto API for encryption and decryption
  */
 export const getEncryptionKey = async (userAddress: Address): Promise<CryptoKey> => {
-  console.log('Getting encryption key for address:', userAddress);
   const storedKey = localStorage.getItem(`${ENCRYPTION_KEY_PREFIX}${userAddress}`);
 
   if (storedKey) {
