@@ -1,4 +1,5 @@
 export type ContractState = {
+  current: number;
   start: number;
   end: number;
   liquidity: string;

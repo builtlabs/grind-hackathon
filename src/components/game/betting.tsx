@@ -33,7 +33,7 @@ interface BettingProps {
 
 export const Betting: React.FC<BettingProps> = ({ className }) => {
   const { number } = useBlock();
-  const { state } = useGame();
+  const { state, oldState } = useGame();
   const countdown = useMemo(
     () => (number && state ? stateCountdown(number, state) : null),
     [number, state]
@@ -186,7 +186,7 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
           <Button
             className="mt-4 w-full"
             type="submit"
-            disabled={state?.start && number ? state?.start <= number : false}
+            disabled={!oldState && state?.start && number ? state?.start <= number : false}
           >
             Place Bet
           </Button>
@@ -199,7 +199,7 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
           className
         )}
       >
-        <h2 className="text-xl font-bold">Your Bets</h2>
+        <h2 className="text-xl font-bold">{oldState ? `Previous Round` : 'Your Bets'}</h2>
         {state && myBets.length > 0 && (
           <div className="flex w-full flex-col gap-2 text-xs">
             <div className="flex items-center justify-between px-1">

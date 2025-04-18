@@ -29,6 +29,7 @@ const getState = cache(
     ]);
 
     return {
+      current: blockNumber,
       start: Number(start),
       end: Number(end),
       liquidity: liquidity.toString(),
