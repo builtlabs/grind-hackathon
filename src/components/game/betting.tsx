@@ -25,6 +25,7 @@ import { cn } from '@/lib/utils';
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { useAbstractClient } from '@abstract-foundation/agw-react';
+import { MultiplierBadge } from './multiplier';
 
 interface BettingProps {
   className?: string;
@@ -102,28 +103,30 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
   }, [state, number, ended, grind]);
 
   return (
-    <div className={cn('flex w-full flex-col gap-5 lg:max-w-xs', className)}>
+    <div className={cn('flex w-full flex-none flex-col gap-5 xl:w-xs', className)}>
       <div className="bg-muted/20 flex h-min flex-col items-center rounded border p-4 backdrop-blur-md">
         <h2 className="text-xl font-bold">Place a Bet</h2>
         {!countdown && 'Place a bet to start the game'}
 
-        {countdown?.type === 'starting' ? (
-          <h3>
-            Round Starting in <strong>{countdown.countdown}</strong> blocks ({countdown.target})
-          </h3>
-        ) : null}
+        <h3 className="text-muted-foreground text-xs">
+          {countdown?.type === 'starting' ? (
+            <>
+              Round Starting in <strong>{countdown.countdown}</strong> blocks ({countdown.target})
+            </>
+          ) : null}
 
-        {countdown?.type === 'ending' ? (
-          <h3>
-            Round Ending in <strong>{countdown.countdown}</strong> blocks ({countdown.target})
-          </h3>
-        ) : null}
+          {countdown?.type === 'ending' ? (
+            <>
+              Round Ending in <strong>{countdown.countdown}</strong> blocks ({countdown.target})
+            </>
+          ) : null}
 
-        {countdown?.type === 'ended' ? (
-          <h3>
-            Round ended at block <strong>{countdown.target}</strong>
-          </h3>
-        ) : null}
+          {countdown?.type === 'ended' ? (
+            <>
+              Round ended at block <strong>{countdown.target}</strong>
+            </>
+          ) : null}
+        </h3>
 
         <form className="flex w-full flex-col gap-4" onSubmit={handleSubmit}>
           <div className="flex flex-col">
@@ -177,14 +180,15 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
       </div>
       <div
         className={cn(
-          'bg-muted/20 flex h-min flex-col items-center gap-3 rounded border p-4 pb-0 backdrop-blur-md lg:grow',
+          'bg-muted/20 flex h-min grow flex-col items-center gap-3 rounded border p-4 backdrop-blur-md',
+          myBets.length === 0 && 'pb-0',
           className
         )}
       >
         <h2 className="text-xl font-bold">Your Bets</h2>
         {state && myBets.length > 0 && (
           <div className="flex w-full flex-col gap-2">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between px-1">
               <span className="text-muted-foreground text-xs">Amount</span>
               <span className="text-muted-foreground text-xs">Multiplier</span>
               <span className="text-muted-foreground text-xs">Profit</span>
@@ -193,7 +197,6 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
               const crashed = !stillAlive(bet, state);
               const bigAmount = BigInt(bet.amount);
               const multiplier = multipliers[bet.cashoutIndex];
-              const formattedMultiplier = formatMultiplier(multiplier);
               const profit = formatUnits((bigAmount * multiplier) / BigInt(1e6) - bigAmount, 18);
 
               return (
@@ -205,7 +208,11 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
                   )}
                 >
                   <span>{formatUnits(bigAmount, 18)}</span>
-                  <span>{formattedMultiplier}x</span>
+                  <MultiplierBadge
+                    key={index}
+                    multiplier={multiplier}
+                    variant={crashed ? 'destructive' : undefined}
+                  />
                   <span className={cn(crashed ? 'text-red-500' : 'text-green-500')}>{profit}</span>
                   {/* TODO: cancel/cash out */}
                 </div>

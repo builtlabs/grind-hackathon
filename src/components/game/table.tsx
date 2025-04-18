@@ -10,10 +10,11 @@ import {
 } from '@/components/ui/table';
 import Image from 'next/image';
 import { useGame } from '../providers/game';
-import { formatMultiplier, multipliers, stillAlive, stillGrinding } from '@/lib/block-crash';
+import { multipliers, stillAlive, stillGrinding } from '@/lib/block-crash';
 import { cn, shorthandHex } from '@/lib/utils';
 import { useBlock } from '../providers/block';
 import { formatUnits } from 'viem';
+import { MultiplierBadge } from './multiplier';
 
 interface GameTableProps {
   className?: string;
@@ -24,7 +25,7 @@ export const GameTable: React.FC<GameTableProps> = ({ className }) => {
   const { state } = useGame();
 
   return (
-    <div className={cn('flex w-full flex-col gap-4 lg:max-w-xs', className)}>
+    <div className={cn('flex w-full flex-none flex-col gap-4 xl:w-xs', className)}>
       <div className="bg-muted/20 flex items-center justify-between gap-6 rounded border p-4 backdrop-blur-md">
         <div className="flex items-center gap-4">
           <Image
@@ -54,7 +55,12 @@ export const GameTable: React.FC<GameTableProps> = ({ className }) => {
         </div>
       </div>
 
-      <div className="bg-muted/20 scrollbar-hidden flex flex-col items-center overflow-y-auto rounded border p-4 pb-0 backdrop-blur-md lg:grow">
+      <div
+        className={cn(
+          'bg-muted/20 scrollbar-hidden flex grow flex-col items-center overflow-y-auto rounded border p-4 backdrop-blur-md',
+          state?.bets.length === 0 && 'pb-0'
+        )}
+      >
         <div className="w-full">
           <Table className="border-separate border-spacing-y-2">
             <TableHeader>
@@ -70,13 +76,15 @@ export const GameTable: React.FC<GameTableProps> = ({ className }) => {
                 const crashed = !stillAlive(bet, state);
                 const bigAmount = BigInt(bet.amount);
                 const multiplier = multipliers[bet.cashoutIndex];
-                const formattedMultiplier = formatMultiplier(multiplier);
                 const profit = formatUnits((bigAmount * multiplier) / BigInt(1e6) - bigAmount, 18);
                 return (
                   <TableRow key={i}>
                     <TableCell>{shorthandHex(bet.user)}</TableCell>
                     <TableCell>{formatUnits(bigAmount, 18)}</TableCell>
-                    <TableCell>{formattedMultiplier}x</TableCell>
+                    <TableCell>
+                      <MultiplierBadge multiplier={multiplier} />
+                    </TableCell>
+
                     <TableCell className={cn(crashed ? 'text-red-500' : 'text-green-500')}>
                       {profit}
                     </TableCell>

@@ -3,27 +3,10 @@
 import { cn } from '@/lib/utils';
 import { useGame } from '../providers/game';
 import { useBlock } from '../providers/block';
-import { ComponentProps, useEffect, useState } from 'react';
-import { Badge } from '../ui/badge';
+import { useEffect, useState } from 'react';
 import { BlockInfo, createBlock, formatMultiplier } from '@/lib/block-crash';
 import Image from 'next/image';
-
-function multiplierVariant(multiplier: number): ComponentProps<typeof Badge>['variant'] {
-  if (multiplier < 1) {
-    return 'destructive';
-  }
-
-  if (multiplier === 1) {
-    return 'warning';
-  }
-
-  if (multiplier > 50) {
-    return 'special';
-  }
-
-  // TODO: Add more variants
-  return 'constructive';
-}
+import { MultiplierBadge } from './multiplier';
 
 export const GameBlock: React.FC = () => {
   const { number } = useBlock();
@@ -48,29 +31,22 @@ export const GameBlock: React.FC = () => {
   }, [number, state]);
 
   return (
-    <div className="flex flex-col items-center justify-between py-5">
+    <div className="flex flex-col items-center justify-between gap-5">
       <div className="flex flex-col items-center">
         <p className="text-base">Current Multiplier</p>
         <p className="text-7xl font-bold">{formatMultiplier(blocks[2]?.multiplier ?? 0n)}x</p>
       </div>
-      <div className="relative isolate mx-20 flex size-40 items-center lg:size-52">
+      <div className="relative isolate mx-16 flex size-40 items-center lg:mx-28 lg:size-64">
         {blocks.map((block, index) => (
           <Block key={block.number} index={index} block={block} />
         ))}
       </div>
       <div className="flex w-full flex-col gap-2">
         <p className="text-muted-foreground text-xs">Multiplier History</p>
-        <div className="bg-muted/20 flex items-center justify-between gap-3 rounded border p-2 backdrop-blur-md">
-          {state?.history.map((result, index) => {
-            const multiplier = formatMultiplier(BigInt(result));
-            const variant = multiplierVariant(Number(multiplier));
-
-            return (
-              <Badge key={index} variant={variant} className="w-12">
-                {multiplier}x
-              </Badge>
-            );
-          })}
+        <div className="bg-muted/20 flex items-center justify-between gap-3 overflow-hidden rounded border p-2 backdrop-blur-md">
+          {state?.history.map((result, index) => (
+            <MultiplierBadge key={index} multiplier={BigInt(result)} />
+          ))}
         </div>
       </div>
 
@@ -80,7 +56,7 @@ export const GameBlock: React.FC = () => {
           width={540}
           height={540}
           alt="grindjetpack"
-          className="animate-in zoom-in fade-in absolute top-10 right-0 -z-10 size-64 -rotate-90 lg:top-auto lg:right-auto lg:bottom-0 lg:left-1/2 lg:size-72 lg:-translate-x-1/2 lg:rotate-0"
+          className="animate-in zoom-in fade-in absolute top-10 right-0 size-64 -rotate-90 lg:top-32 xl:top-auto xl:right-auto xl:bottom-0 xl:left-1/2 xl:size-72 xl:-translate-x-1/2 xl:rotate-0"
           unoptimized
         />
       ) : null}
