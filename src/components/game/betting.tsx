@@ -22,6 +22,7 @@ import { useGame } from '../providers/game';
 import { toast } from 'sonner';
 import { useBlock } from '../providers/block';
 import { cn } from '@/lib/utils';
+import { useEffect } from 'react';
 
 interface BettingProps {
   className?: string;
@@ -73,6 +74,11 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
     ]);
   }
 
+  useEffect(() => {
+    grind.refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state?.history.length]);
+
   return (
     <div className={cn('flex flex-col items-center', className)}>
       <h2 className="text-xl font-bold">Place a Bet</h2>
@@ -80,13 +86,13 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
 
       {state?.start && number && state?.start > number ? (
         <h3>
-          Round Starting in <strong>{state.start - number}</strong> blocks
+          Round Starting in <strong>{state.start - number}</strong> blocks ({state.start})
         </h3>
       ) : null}
 
       {!state?.end && state?.start && number && state?.start <= number ? (
         <h3>
-          Round Ending in <strong>{multipliers.length - (number - state.start)}</strong> blocks
+          Round Ending in <strong>{multipliers.length - 1 - (number - state.start)}</strong> blocks
         </h3>
       ) : null}
 

@@ -24,7 +24,7 @@ function createBlock(number: number, state?: ContractState): BlockInfo {
     };
   }
 
-  const end = state.end || state.start + multipliers.length;
+  const end = state.end || state.start + multipliers.length - 1;
 
   if (state.start <= number && number < end) {
     return {
@@ -91,7 +91,7 @@ export const GameBlock: React.FC = () => {
           <Block key={block.number} index={index} block={block} />
         ))}
       </div>
-      <div className="flex flex-row-reverse items-center justify-center gap-3">
+      <div className="flex items-center justify-center gap-3">
         {state?.history.map((result, index) => {
           const multiplier = formatUnits(BigInt(result), 6);
           const variant = multiplierVariant(Number(multiplier));
