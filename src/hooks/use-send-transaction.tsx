@@ -67,6 +67,7 @@ export function useSendTransaction(options: Options) {
     if (mintReceipt.isSuccess) {
       toast.success('Transaction Success', {
         id: options.key,
+        description: 'Transaction was successful.',
         duration: 2000,
       });
       options.onSuccess?.();
@@ -76,6 +77,7 @@ export function useSendTransaction(options: Options) {
     if (mintReceipt.isError) {
       toast.error('Transaction Failed', {
         id: options.key,
+        description: 'Transaction failed. Please try again.',
         duration: 2000,
       });
       transaction.reset();

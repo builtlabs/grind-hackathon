@@ -48,7 +48,7 @@ export const GameBlock: React.FC = () => {
       </div>
       <div className="flex w-full flex-col gap-2">
         <p className="text-muted-foreground text-xs">Multiplier History</p>
-        <div className="bg-muted/20 flex items-center justify-between gap-3 overflow-hidden rounded border p-2 backdrop-blur-md">
+        <div className="bg-muted/20 flex h-10 items-center justify-between gap-3 overflow-hidden rounded border p-2 backdrop-blur-md">
           {state?.history.map((result, index) => (
             <MultiplierBadge key={index} multiplier={BigInt(result)} />
           ))}

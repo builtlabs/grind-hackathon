@@ -8,6 +8,7 @@ import { BlockProvider } from '@/components/providers/block';
 import { Toaster } from '@/components/ui/sonner';
 import { AbstractWalletWrapper } from '@/components/providers/abstract';
 import MatrixRainBackground from '@/components/background';
+import { GameProvider } from '@/components/providers/game';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -38,10 +39,12 @@ export default async function RootLayout({
         <AbstractWalletWrapper nonce={nonce}>
           <BlockProvider>
             <Header />
-            <div className="relative -mt-16 flex flex-col overflow-hidden xl:min-h-screen xl:pt-16">
-              <MatrixRainBackground />
-              {children}
-            </div>
+            <GameProvider>
+              <div className="relative -mt-16 flex flex-col overflow-hidden xl:min-h-screen xl:pt-16">
+                <MatrixRainBackground />
+                {children}
+              </div>
+            </GameProvider>
           </BlockProvider>
           <Footer />
         </AbstractWalletWrapper>
