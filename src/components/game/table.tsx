@@ -25,7 +25,7 @@ export const GameTable: React.FC<GameTableProps> = ({ className }) => {
   const { state } = useGame();
 
   return (
-    <div className={cn('flex w-full flex-none flex-col gap-4 xl:w-xs', className)}>
+    <div className={cn('flex w-full flex-none flex-col gap-4 xl:w-sm', className)}>
       <div className="bg-muted/20 flex items-center justify-between gap-6 rounded border p-4 backdrop-blur-md">
         <div className="flex items-center gap-4">
           <Image
@@ -78,7 +78,7 @@ export const GameTable: React.FC<GameTableProps> = ({ className }) => {
                 const multiplier = multipliers[bet.cashoutIndex];
                 const profit = formatUnits((bigAmount * multiplier) / BigInt(1e6) - bigAmount, 18);
                 return (
-                  <TableRow key={i}>
+                  <TableRow key={i} className="text-xs">
                     <TableCell>{shorthandHex(bet.user)}</TableCell>
                     <TableCell>{formatUnits(bigAmount, 18)}</TableCell>
                     <TableCell>
@@ -107,7 +107,7 @@ export const GameTable: React.FC<GameTableProps> = ({ className }) => {
             width={540}
             height={540}
             alt="vibinghamster"
-            className="mt-auto size-32"
+            className="mt-auto size-40"
             unoptimized
           />
         )}

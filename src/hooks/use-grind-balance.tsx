@@ -35,6 +35,7 @@ export function useGrindBalance() {
         return {
           formatted,
           value: Number(formatted),
+          raw: data[0],
           decimals: data[1],
           symbol: data[2],
         };

@@ -32,9 +32,14 @@ export const GameBlock: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center justify-between gap-5">
-      <div className="flex flex-col items-center">
+      <div className="flex h-28 flex-col items-center">
         <p className="text-base">Current Multiplier</p>
-        <p className="text-7xl font-bold">{formatMultiplier(blocks[2]?.multiplier ?? 0n)}x</p>
+
+        <p className="text-7xl font-bold">
+          {blocks[2]?.result === 'none' && '--'}
+          {blocks[2]?.result === 'ok' && <>{formatMultiplier(blocks[2].multiplier)}x</>}
+          {blocks[2]?.result === 'crash' && <span className="text-[#941818]">CRASH</span>}
+        </p>
       </div>
       <div className="relative isolate mx-16 flex size-40 items-center lg:mx-28 lg:size-64">
         {blocks.map((block, index) => (
@@ -82,12 +87,14 @@ const Block: React.FC<BlockProps> = ({ block, index }) => {
         index === 4 && '-z-20 scale-0',
         block.result === 'ok' && 'border-[#269418] bg-[#196622]',
         block.result === 'crash' && 'border-[#941818] bg-[#5E0C0D]',
-        block.result === 'none' && 'bg-muted'
+        block.result === 'none' && 'bg-muted border-border/40'
       )}
     >
-      <p className="text-xl font-bold opacity-70">#{block.number}</p>
+      <p className="text-muted-foreground text-sm font-medium">#{block.number}</p>
       <p className="absolute top-1/2 -translate-y-1/2 text-4xl font-bold">
-        {formatMultiplier(block.multiplier)}x
+        {block.result === 'none' && '--'}
+        {block.result === 'ok' && <>{formatMultiplier(block.multiplier)}x</>}
+        {block.result === 'crash' && <span className="text-[#941818]">CRASH</span>}
       </p>
     </div>
   );

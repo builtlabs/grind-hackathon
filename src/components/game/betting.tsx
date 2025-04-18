@@ -60,12 +60,26 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
     const amount = formData.get('amount') as string;
     const multiplier = formData.get('multiplier') as string;
 
+    if (!amount) {
+      toast.error('Invalid bet', {
+        description: `Please enter a valid amount.`,
+      });
+      return;
+    }
+
     const bigAmount = parseUnits(amount, grind.data.decimals);
+    if (bigAmount > grind.data.raw) {
+      toast.error('Insufficient balance', {
+        description: `You don't have enough ${grind.data.symbol} to place this bet.`,
+      });
+      return;
+    }
 
     if (bigAmount > BigInt(state.liquidity)) {
       toast.error('Bet too large', {
         description: `Your bet amount is larger than the current liquidity of the game.`,
       });
+      return;
     }
 
     sendTransaction([
@@ -106,9 +120,9 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
     <div className={cn('flex w-full flex-none flex-col gap-5 xl:w-xs', className)}>
       <div className="bg-muted/20 flex h-min flex-col items-center rounded border p-4 backdrop-blur-md">
         <h2 className="text-xl font-bold">Place a Bet</h2>
-        {!countdown && 'Place a bet to start the game'}
 
         <h3 className="text-muted-foreground text-xs">
+          {!countdown && 'Place a bet to start the game'}
           {countdown?.type === 'starting' ? (
             <>
               Round Starting in <strong>{countdown.countdown}</strong> blocks ({countdown.target})
@@ -187,7 +201,7 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
       >
         <h2 className="text-xl font-bold">Your Bets</h2>
         {state && myBets.length > 0 && (
-          <div className="flex w-full flex-col gap-2">
+          <div className="flex w-full flex-col gap-2 text-xs">
             <div className="flex items-center justify-between px-1">
               <span className="text-muted-foreground text-xs">Amount</span>
               <span className="text-muted-foreground text-xs">Multiplier</span>

@@ -19,7 +19,7 @@ const getState = cache(
         abi,
         address: addresses[abstractTestnet.id],
         functionName: 'getHistory',
-        args: [6n],
+        args: [7n],
       }),
       publicClient.readContract({
         abi,
