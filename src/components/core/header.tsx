@@ -7,15 +7,13 @@ export const Header: React.FC = () => {
       <div className="flex items-center gap-2">
         <Link
           href="/"
-          className="text-xl font-bold uppercase min-[250px]:text-2xl min-[400px]:text-3xl"
+          className="text-xl font-bold uppercase min-[320px]:text-2xl min-[400px]:text-3xl"
         >
           HASHCRASH
         </Link>
       </div>
 
-      <div className="flex items-center gap-2 md:gap-4">
-        <AuthButton />
-      </div>
+      <AuthButton />
     </header>
   );
 };

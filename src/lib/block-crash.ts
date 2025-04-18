@@ -131,3 +131,18 @@ export function stateCountdown(
 
   return null;
 }
+
+export function stillAlive(
+  bet: { cashoutIndex: number },
+  state: { start: number; end?: number }
+): boolean {
+  return !state.end || state.start + bet.cashoutIndex < state.end;
+}
+
+export function stillGrinding(
+  bet: { cashoutIndex: number },
+  state: { start: number; end?: number },
+  blockNumber?: number
+): boolean {
+  return !!blockNumber && !state.end && state.start + bet.cashoutIndex > blockNumber;
+}

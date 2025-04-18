@@ -6,6 +6,7 @@ import { useBlock } from '../providers/block';
 import { ComponentProps, useEffect, useState } from 'react';
 import { Badge } from '../ui/badge';
 import { BlockInfo, createBlock, formatMultiplier } from '@/lib/block-crash';
+import Image from 'next/image';
 
 function multiplierVariant(multiplier: number): ComponentProps<typeof Badge>['variant'] {
   if (multiplier < 1) {
@@ -39,7 +40,7 @@ export const GameBlock: React.FC = () => {
   }, [number, state]);
 
   return (
-    <div className="flex flex-col items-center gap-11 py-5">
+    <div className="flex flex-col items-center justify-between py-5">
       <div className="flex flex-col items-center">
         <p className="text-base">Current Multiplier</p>
         <p className="text-7xl font-bold">{formatMultiplier(blocks[2]?.multiplier ?? 0n)}x</p>
@@ -49,18 +50,32 @@ export const GameBlock: React.FC = () => {
           <Block key={block.number} index={index} block={block} />
         ))}
       </div>
-      <div className="flex items-center justify-center gap-3">
-        {state?.history.map((result, index) => {
-          const multiplier = formatMultiplier(BigInt(result));
-          const variant = multiplierVariant(Number(multiplier));
+      <div className="flex w-full flex-col gap-2">
+        <p className="text-muted-foreground text-xs">Multiplier History</p>
+        <div className="bg-muted/20 flex items-center justify-between gap-3 rounded border p-2 backdrop-blur-md">
+          {state?.history.map((result, index) => {
+            const multiplier = formatMultiplier(BigInt(result));
+            const variant = multiplierVariant(Number(multiplier));
 
-          return (
-            <Badge key={index} variant={variant}>
-              {multiplier}x
-            </Badge>
-          );
-        })}
+            return (
+              <Badge key={index} variant={variant} className="w-12">
+                {multiplier}x
+              </Badge>
+            );
+          })}
+        </div>
       </div>
+
+      {number && state?.start && !state?.end && number - state.start > 11 ? (
+        <Image
+          src="https://grind.bearish.af/grindjetpack.gif"
+          width={540}
+          height={540}
+          alt="grindjetpack"
+          className="animate-in zoom-in fade-in absolute top-10 right-0 -z-10 size-64 -rotate-90 lg:top-auto lg:right-auto lg:bottom-0 lg:left-1/2 lg:size-72 lg:-translate-x-1/2 lg:rotate-0"
+          unoptimized
+        />
+      ) : null}
     </div>
   );
 };

@@ -7,7 +7,7 @@ import { abstractTestnet } from 'viem/chains';
 import { Mint } from '../mint';
 import { useSendTransaction } from '@/hooks/use-send-transaction';
 import { useGrindBalance } from '@/hooks/use-grind-balance';
-import { encodeFunctionData, parseUnits } from 'viem';
+import { encodeFunctionData, formatUnits, parseUnits } from 'viem';
 import { abi, addresses } from '@/contracts/block-crash';
 import { abi as grindAbi, addresses as grindAddresses } from '@/contracts/grind';
 import {
@@ -17,12 +17,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { formatMultiplier, multipliers, stateCountdown } from '@/lib/block-crash';
+import { formatMultiplier, multipliers, stateCountdown, stillAlive } from '@/lib/block-crash';
 import { useGame } from '../providers/game';
 import { toast } from 'sonner';
 import { useBlock } from '../providers/block';
 import { cn } from '@/lib/utils';
 import { useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
+import { useAbstractClient } from '@abstract-foundation/agw-react';
 
 interface BettingProps {
   className?: string;
@@ -35,6 +37,12 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
     () => (number && state ? stateCountdown(number, state) : null),
     [number, state]
   );
+  const { data: client } = useAbstractClient();
+  const myBets = useMemo(() => {
+    if (!state || !client) return [];
+
+    return state.bets.filter(bet => bet.user === client.account.address);
+  }, [state, client]);
   const [ended, setEnded] = useState(false);
   const grind = useGrindBalance();
   const { sendTransaction } = useSendTransaction({
@@ -94,77 +102,134 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
   }, [state, number, ended, grind]);
 
   return (
-    <div className={cn('flex flex-col items-center', className)}>
-      <h2 className="text-xl font-bold">Place a Bet</h2>
-      {!countdown && 'Place a bet to start the game'}
+    <div className={cn('flex w-full flex-col gap-5 lg:max-w-xs', className)}>
+      <div className="bg-muted/20 flex h-min flex-col items-center rounded border p-4 backdrop-blur-md">
+        <h2 className="text-xl font-bold">Place a Bet</h2>
+        {!countdown && 'Place a bet to start the game'}
 
-      {countdown?.type === 'starting' ? (
-        <h3>
-          Round Starting in <strong>{countdown.countdown}</strong> blocks ({countdown.target})
-        </h3>
-      ) : null}
+        {countdown?.type === 'starting' ? (
+          <h3>
+            Round Starting in <strong>{countdown.countdown}</strong> blocks ({countdown.target})
+          </h3>
+        ) : null}
 
-      {countdown?.type === 'ending' ? (
-        <h3>
-          Round Ending in <strong>{countdown.countdown}</strong> blocks ({countdown.target})
-        </h3>
-      ) : null}
+        {countdown?.type === 'ending' ? (
+          <h3>
+            Round Ending in <strong>{countdown.countdown}</strong> blocks ({countdown.target})
+          </h3>
+        ) : null}
 
-      {countdown?.type === 'ended' ? (
-        <h3>
-          Round ended at block <strong>{countdown.target}</strong>
-        </h3>
-      ) : null}
+        {countdown?.type === 'ended' ? (
+          <h3>
+            Round ended at block <strong>{countdown.target}</strong>
+          </h3>
+        ) : null}
 
-      <form className="flex w-80 flex-col gap-4" onSubmit={handleSubmit}>
-        <div className="flex flex-col">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="amount" className="mb-1">
-              Bet Amount
-            </Label>
+        <form className="flex w-full flex-col gap-4" onSubmit={handleSubmit}>
+          <div className="flex flex-col">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="amount" className="mb-1">
+                Bet Amount
+              </Label>
 
-            <span className="text-sm text-gray-500">
-              {grind.data?.formatted} {grind.data?.symbol}
-            </span>
+              <span className="text-sm text-gray-500">
+                {grind.data?.formatted} {grind.data?.symbol}
+              </span>
+            </div>
+            <Input
+              id="amount"
+              name="amount"
+              type="number"
+              placeholder="0.00"
+              className="w-full"
+              min={0}
+              step={0.01}
+            />
+            <Mint onSuccess={grind.refetch} disabled={grind.data && grind.data?.value >= 500} />
           </div>
-          <Input
-            id="amount"
-            name="amount"
-            type="number"
-            placeholder="0.00"
-            className="w-full"
-            min={0}
-            step={0.01}
-          />
-          <Mint onSuccess={grind.refetch} disabled={grind.data && grind.data?.value >= 500} />
-        </div>
 
-        <div className="flex flex-col">
-          <Label htmlFor="multiplier" className="mb-1">
-            Auto Cashout
-          </Label>
-          <Select name="multiplier" defaultValue="49">
-            <SelectTrigger className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {multipliers.map((multiplier, index) => (
-                <SelectItem key={multiplier} value={index.toString()}>
-                  {formatMultiplier(multiplier)}x
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+          <div className="flex flex-col">
+            <Label htmlFor="multiplier" className="mb-1">
+              Auto Cashout
+            </Label>
+            <Select name="multiplier" defaultValue="49">
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {multipliers.map((multiplier, index) => (
+                  <SelectItem key={multiplier} value={index.toString()}>
+                    {formatMultiplier(multiplier)}x
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        <Button
-          className="mt-4 w-full"
-          type="submit"
-          disabled={state?.start && number ? state?.start <= number : false}
-        >
-          Place Bet
-        </Button>
-      </form>
+          <Button
+            className="mt-4 w-full"
+            type="submit"
+            disabled={state?.start && number ? state?.start <= number : false}
+          >
+            Place Bet
+          </Button>
+        </form>
+      </div>
+      <div
+        className={cn(
+          'bg-muted/20 flex h-min flex-col items-center gap-3 rounded border p-4 pb-0 backdrop-blur-md lg:grow',
+          className
+        )}
+      >
+        <h2 className="text-xl font-bold">Your Bets</h2>
+        {state && myBets.length > 0 && (
+          <div className="flex w-full flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground text-xs">Amount</span>
+              <span className="text-muted-foreground text-xs">Multiplier</span>
+              <span className="text-muted-foreground text-xs">Profit</span>
+            </div>
+            {myBets.map((bet, index) => {
+              const crashed = !stillAlive(bet, state);
+              const bigAmount = BigInt(bet.amount);
+              const multiplier = multipliers[bet.cashoutIndex];
+              const formattedMultiplier = formatMultiplier(multiplier);
+              const profit = formatUnits((bigAmount * multiplier) / BigInt(1e6) - bigAmount, 18);
+
+              return (
+                <div
+                  key={index}
+                  className={cn(
+                    'flex w-full items-center justify-between rounded border p-2',
+                    crashed ? 'bg-red-500/20' : 'bg-green-500/20'
+                  )}
+                >
+                  <span>{formatUnits(bigAmount, 18)}</span>
+                  <span>{formattedMultiplier}x</span>
+                  <span className={cn(crashed ? 'text-red-500' : 'text-green-500')}>{profit}</span>
+                  {/* TODO: cancel/cash out */}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {!myBets.length && (
+          <>
+            <p className="text-muted-foreground text-xs">
+              Your bets will be displayed here after placing them
+            </p>
+            <Image
+              src="https://grind.bearish.af/GrindMath01.gif"
+              alt="Grind Math"
+              width={540}
+              height={540}
+              unoptimized
+              className="mt-auto size-32"
+            />
+          </>
+        )}
+      </div>
     </div>
   );
 };

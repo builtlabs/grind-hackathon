@@ -19,7 +19,7 @@ export const AuthButton: React.FC<{
 
   if (status !== 'connected') {
     return (
-      <Button className={cn('w-44', className)} onClick={login} type="button">
+      <Button className={cn('md:w-44', className)} onClick={login} type="button">
         Connect Abstract
       </Button>
     );
@@ -31,7 +31,7 @@ export const AuthButton: React.FC<{
 
   return (
     <Button
-      className={cn('w-44', className)}
+      className={cn('md:w-44', className)}
       type="button"
       variant="outline"
       onClick={handleLogout}
