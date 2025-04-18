@@ -72,21 +72,21 @@ export function createBlock(
     };
   }
 
-  const end = state.end || state.start + multipliers.length - 1;
-
-  if (state.start <= number && number < end) {
-    return {
-      number,
-      multiplier: multipliers[number - state.start],
-      result: 'ok',
-    };
-  }
-
-  if (number === end) {
+  if (state.end && number === state.end) {
     return {
       number,
       multiplier: multipliers[number - state.start],
       result: 'crash',
+    };
+  }
+
+  const end = state.end || state.start + multipliers.length - 1;
+
+  if (state.start <= number && number <= end) {
+    return {
+      number,
+      multiplier: multipliers[number - state.start],
+      result: 'ok',
     };
   }
 
