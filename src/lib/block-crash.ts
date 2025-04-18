@@ -1,3 +1,6 @@
+import { ContractState } from '@/app/api/game/types';
+import { formatUnits } from 'viem';
+
 export const multipliers = [
   500000n,
   750000n,
@@ -50,3 +53,81 @@ export const multipliers = [
   97500000n,
   100000000n,
 ];
+
+export interface BlockInfo {
+  number: number;
+  multiplier: bigint;
+  result: 'ok' | 'crash' | 'none';
+}
+
+export function createBlock(
+  number: number,
+  state?: Omit<ContractState, 'liquidity' | 'history' | 'bets'>
+): BlockInfo {
+  if (!state) {
+    return {
+      number,
+      multiplier: 0n,
+      result: 'none',
+    };
+  }
+
+  const end = state.end || state.start + multipliers.length - 1;
+
+  if (state.start <= number && number < end) {
+    return {
+      number,
+      multiplier: multipliers[number - state.start],
+      result: 'ok',
+    };
+  }
+
+  if (number === end) {
+    return {
+      number,
+      multiplier: multipliers[number - state.start],
+      result: 'crash',
+    };
+  }
+
+  return {
+    number,
+    multiplier: 0n,
+    result: 'none',
+  };
+}
+
+export function formatMultiplier(multiplier: bigint): string {
+  return formatUnits(multiplier, 6);
+}
+
+export function stateCountdown(
+  number: number,
+  state: Omit<ContractState, 'liquidity' | 'history' | 'bets'>
+) {
+  if (state?.start && number && state?.start > number) {
+    return {
+      type: 'starting',
+      countdown: state.start - number,
+      target: state.start,
+    } as const;
+  }
+
+  if (!state?.end && state?.start && number && state?.start <= number) {
+    return {
+      type: 'ending',
+      countdown: state.start + multipliers.length - 1 - number,
+      target: state.start + multipliers.length - 1,
+    } as const;
+  }
+
+  if (state?.end && number) {
+    return {
+      type: 'ended',
+      countdown: 0,
+      target: state.end,
+    } as const;
+  }
+
+  return null;
+}

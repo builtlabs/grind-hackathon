@@ -4,50 +4,8 @@ import { cn } from '@/lib/utils';
 import { useGame } from '../providers/game';
 import { useBlock } from '../providers/block';
 import { ComponentProps, useEffect, useState } from 'react';
-import { ContractState } from '@/app/api/game/types';
-import { multipliers } from '@/lib/block-crash';
-import { formatUnits } from 'viem';
 import { Badge } from '../ui/badge';
-
-interface BlockInfo {
-  number: number;
-  multiplier: bigint;
-  result: 'ok' | 'crash' | 'none';
-}
-
-function createBlock(number: number, state?: ContractState): BlockInfo {
-  if (!state) {
-    return {
-      number,
-      multiplier: 0n,
-      result: 'none',
-    };
-  }
-
-  const end = state.end || state.start + multipliers.length - 1;
-
-  if (state.start <= number && number < end) {
-    return {
-      number,
-      multiplier: multipliers[number - state.start],
-      result: 'ok',
-    };
-  }
-
-  if (number === end) {
-    return {
-      number,
-      multiplier: multipliers[number - state.start],
-      result: 'crash',
-    };
-  }
-
-  return {
-    number,
-    multiplier: 0n,
-    result: 'none',
-  };
-}
+import { BlockInfo, createBlock, formatMultiplier } from '@/lib/block-crash';
 
 function multiplierVariant(multiplier: number): ComponentProps<typeof Badge>['variant'] {
   if (multiplier < 1) {
@@ -84,7 +42,7 @@ export const GameBlock: React.FC = () => {
     <div className="flex flex-col items-center gap-11 py-5">
       <div className="flex flex-col items-center">
         <p className="text-base">Current Multiplier</p>
-        <p className="text-7xl font-bold">{formatUnits(blocks[2]?.multiplier ?? 0n, 6)}x</p>
+        <p className="text-7xl font-bold">{formatMultiplier(blocks[2]?.multiplier ?? 0n)}x</p>
       </div>
       <div className="relative isolate mx-20 flex size-40 items-center lg:size-52">
         {blocks.map((block, index) => (
@@ -93,7 +51,7 @@ export const GameBlock: React.FC = () => {
       </div>
       <div className="flex items-center justify-center gap-3">
         {state?.history.map((result, index) => {
-          const multiplier = formatUnits(BigInt(result), 6);
+          const multiplier = formatMultiplier(BigInt(result));
           const variant = multiplierVariant(Number(multiplier));
 
           return (
@@ -130,7 +88,7 @@ const Block: React.FC<BlockProps> = ({ block, index }) => {
     >
       <p className="text-xl font-bold opacity-70">#{block.number}</p>
       <p className="absolute top-1/2 -translate-y-1/2 text-4xl font-bold">
-        {formatUnits(block.multiplier, 6)}x
+        {formatMultiplier(block.multiplier)}x
       </p>
     </div>
   );

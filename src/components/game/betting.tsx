@@ -7,7 +7,7 @@ import { abstractTestnet } from 'viem/chains';
 import { Mint } from '../mint';
 import { useSendTransaction } from '@/hooks/use-send-transaction';
 import { useGrindBalance } from '@/hooks/use-grind-balance';
-import { encodeFunctionData, formatUnits, parseUnits } from 'viem';
+import { encodeFunctionData, parseUnits } from 'viem';
 import { abi, addresses } from '@/contracts/block-crash';
 import { abi as grindAbi, addresses as grindAddresses } from '@/contracts/grind';
 import {
@@ -17,12 +17,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { multipliers } from '@/lib/block-crash';
+import { formatMultiplier, multipliers, stateCountdown } from '@/lib/block-crash';
 import { useGame } from '../providers/game';
 import { toast } from 'sonner';
 import { useBlock } from '../providers/block';
 import { cn } from '@/lib/utils';
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 interface BettingProps {
   className?: string;
@@ -31,6 +31,10 @@ interface BettingProps {
 export const Betting: React.FC<BettingProps> = ({ className }) => {
   const { number } = useBlock();
   const { state } = useGame();
+  const countdown = useMemo(
+    () => (number && state ? stateCountdown(number, state) : null),
+    [number, state]
+  );
   const [ended, setEnded] = useState(false);
   const grind = useGrindBalance();
   const { sendTransaction } = useSendTransaction({
@@ -92,23 +96,23 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
   return (
     <div className={cn('flex flex-col items-center', className)}>
       <h2 className="text-xl font-bold">Place a Bet</h2>
-      {!state?.start && 'Place a bet to start the game'}
+      {!countdown && 'Place a bet to start the game'}
 
-      {state?.start && number && state?.start > number ? (
+      {countdown?.type === 'starting' ? (
         <h3>
-          Round Starting in <strong>{state.start - number}</strong> blocks ({state.start})
+          Round Starting in <strong>{countdown.countdown}</strong> blocks ({countdown.target})
         </h3>
       ) : null}
 
-      {!state?.end && state?.start && number && state?.start <= number ? (
+      {countdown?.type === 'ending' ? (
         <h3>
-          Round Ending in <strong>{multipliers.length - 1 - (number - state.start)}</strong> blocks
+          Round Ending in <strong>{countdown.countdown}</strong> blocks ({countdown.target})
         </h3>
       ) : null}
 
-      {state?.end && number ? (
+      {countdown?.type === 'ended' ? (
         <h3>
-          Round ended at block <strong>{state.end}</strong>
+          Round ended at block <strong>{countdown.target}</strong>
         </h3>
       ) : null}
 
@@ -146,7 +150,7 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
             <SelectContent>
               {multipliers.map((multiplier, index) => (
                 <SelectItem key={multiplier} value={index.toString()}>
-                  {formatUnits(multiplier, 6)}x
+                  {formatMultiplier(multiplier)}x
                 </SelectItem>
               ))}
             </SelectContent>

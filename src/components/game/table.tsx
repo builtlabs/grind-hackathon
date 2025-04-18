@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/table';
 import Image from 'next/image';
 import { useGame } from '../providers/game';
-import { multipliers } from '@/lib/block-crash';
+import { formatMultiplier, multipliers } from '@/lib/block-crash';
 import { cn, shorthandHex } from '@/lib/utils';
 import { useBlock } from '../providers/block';
 import { formatUnits } from 'viem';
@@ -81,7 +81,7 @@ export const GameTable: React.FC<GameTableProps> = ({ className }) => {
               const crashed = !stillAlive(bet, state);
               const bigAmount = BigInt(bet.amount);
               const multiplier = multipliers[bet.cashoutIndex];
-              const formattedMultiplier = formatUnits(multiplier, 6);
+              const formattedMultiplier = formatMultiplier(multiplier);
               const profit = formatUnits((bigAmount * multiplier) / BigInt(1e6), 18);
               return (
                 <TableRow key={i}>
