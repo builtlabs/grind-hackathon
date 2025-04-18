@@ -194,7 +194,7 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
       </div>
       <div
         className={cn(
-          'bg-muted/20 flex h-min grow flex-col items-center gap-3 rounded border p-4 backdrop-blur-md',
+          'bg-muted/20 scrollbar-hidden flex h-min grow flex-col items-center gap-3 overflow-y-auto rounded border p-4 backdrop-blur-md',
           myBets.length === 0 && 'pb-0',
           className
         )}
