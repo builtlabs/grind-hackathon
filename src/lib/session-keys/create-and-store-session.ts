@@ -72,6 +72,31 @@ export const createAndStoreSession = async (
             maxValuePerUse: BigInt(0),
             constraints: [],
           },
+          // {
+          //   target: grindAddresses[abstractTestnet.id],
+          //   selector: toFunctionSelector(getAbiItem({ abi: grindAbi, name: 'approve' })),
+          //   valueLimit: {
+          //     limitType: LimitType.Unlimited,
+          //     limit: BigInt(0),
+          //     period: BigInt(0),
+          //   },
+          //   maxValuePerUse: BigInt(0),
+          //   constraints: [
+          //     {
+          //       condition: ConstraintCondition.Equal,
+          //       index: 0n,
+          //       refValue: encodeAbiParameters(
+          //         [{ type: 'address' }],
+          //         [blockCrashAddresses[abstractTestnet.id]]
+          //       ),
+          //       limit: {
+          //         limitType: LimitType.Unlimited,
+          //         limit: BigInt(0),
+          //         period: BigInt(0),
+          //       },
+          //     },
+          //   ],
+          // },
           {
             target: blockCrashAddresses[abstractTestnet.id],
             selector: toFunctionSelector(getAbiItem({ abi: blockCrashAbi, name: 'placeBet' })),

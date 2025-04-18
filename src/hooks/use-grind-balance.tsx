@@ -1,4 +1,5 @@
 import { abi, addresses } from '@/contracts/grind';
+import { addresses as blockCrashAddresses } from '@/contracts/block-crash';
 import { useAbstractClient } from '@abstract-foundation/agw-react';
 import { Address, formatUnits } from 'viem';
 import { abstractTestnet } from 'viem/chains';
@@ -26,6 +27,12 @@ export function useGrindBalance() {
         abi,
         functionName: 'symbol',
       },
+      {
+        address: addresses[abstractTestnet.id],
+        abi,
+        functionName: 'allowance',
+        args: [client?.account.address as Address, blockCrashAddresses[abstractTestnet.id]],
+      },
     ],
     query: {
       enabled: !!client,
@@ -38,6 +45,7 @@ export function useGrindBalance() {
           raw: data[0],
           decimals: data[1],
           symbol: data[2],
+          allowance: data[3],
         };
       },
     },

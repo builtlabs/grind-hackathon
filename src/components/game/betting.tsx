@@ -7,7 +7,14 @@ import { abstractTestnet } from 'viem/chains';
 import { Mint } from '../mint';
 import { useSendTransaction } from '@/hooks/use-send-transaction';
 import { useGrindBalance } from '@/hooks/use-grind-balance';
-import { encodeFunctionData, formatUnits, parseUnits } from 'viem';
+import {
+  Account,
+  Chain,
+  encodeFunctionData,
+  formatUnits,
+  parseUnits,
+  SendTransactionParameters,
+} from 'viem';
 import { abi, addresses } from '@/contracts/block-crash';
 import { abi as grindAbi, addresses as grindAddresses } from '@/contracts/grind';
 import {
@@ -47,7 +54,7 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
   }, [state, client]);
   const [ended, setEnded] = useState(false);
   const grind = useGrindBalance();
-  const { sendTransaction } = useSendTransaction({
+  const { sendTransaction, isPending } = useSendTransaction({
     key: 'place-bet',
     onSuccess: grind.refetch,
   });
@@ -83,15 +90,7 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
       return;
     }
 
-    sendTransaction([
-      {
-        to: grindAddresses[abstractTestnet.id],
-        data: encodeFunctionData({
-          abi: grindAbi,
-          functionName: 'approve',
-          args: [addresses[abstractTestnet.id], bigAmount],
-        }),
-      },
+    const transactions: SendTransactionParameters<Chain, Account>[] = [
       {
         to: addresses[abstractTestnet.id],
         data: encodeFunctionData({
@@ -100,7 +99,20 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
           args: [bigAmount, BigInt(multiplier)],
         }),
       },
-    ]);
+    ];
+
+    if (grind.data.allowance < bigAmount) {
+      transactions.unshift({
+        to: grindAddresses[abstractTestnet.id],
+        data: encodeFunctionData({
+          abi: grindAbi,
+          functionName: 'approve',
+          args: [addresses[abstractTestnet.id], bigAmount],
+        }),
+      });
+    }
+
+    sendTransaction(transactions);
   }
 
   useEffect(() => {
@@ -188,7 +200,9 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
             <Button
               className="mt-4 w-full"
               type="submit"
-              disabled={!oldState && state?.start && number ? state?.start <= number : false}
+              disabled={
+                isPending || (!oldState && state?.start && number ? state?.start <= number : false)
+              }
             >
               Place Bet
             </Button>

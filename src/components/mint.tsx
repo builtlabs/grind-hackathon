@@ -10,7 +10,7 @@ interface MintProps {
 }
 
 export const Mint: React.FC<MintProps> = ({ onSuccess, disabled }) => {
-  const { sendTransaction } = useSendTransaction({
+  const { sendTransaction, isPending } = useSendTransaction({
     key: 'mint-grind',
     onSuccess,
   });
@@ -32,7 +32,7 @@ export const Mint: React.FC<MintProps> = ({ onSuccess, disabled }) => {
       className="text-muted-foreground ml-auto h-min p-0 text-xs"
       size="sm"
       onClick={handleMint}
-      disabled={disabled}
+      disabled={disabled || isPending}
     >
       mint tokens
     </Button>

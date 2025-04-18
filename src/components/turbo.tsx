@@ -5,12 +5,43 @@ import { useAbstractSession } from '@/hooks/use-abstract-session';
 import { useEffect, useState } from 'react';
 import { useAbstractClient } from '@abstract-foundation/agw-react';
 import { toast } from 'sonner';
+import { useSendTransaction } from '@/hooks/use-send-transaction';
+import { encodeFunctionData, maxUint256 } from 'viem';
+import { abi as grindAbi, addresses as grindAddresses } from '@/contracts/grind';
+import { addresses } from '@/contracts/block-crash';
+import { useGrindBalance } from '@/hooks/use-grind-balance';
 
 export const Turbo: React.FC = () => {
   const { data: client } = useAbstractClient();
   const { getStoredSession, clearStoredSession, createAndStoreSession } =
     useAbstractSession(abstractTestnet);
   const [session, setSession] = useState<Awaited<ReturnType<typeof getStoredSession>>>(null);
+  const grind = useGrindBalance();
+  const { sendTransaction } = useSendTransaction({
+    key: 'approve-grind',
+    onSuccess() {
+      grind.refetch();
+      enableTurboMode();
+    },
+  });
+
+  function enableTurboMode() {
+    const promise = createAndStoreSession()?.then(session => {
+      if (session) {
+        setSession(session);
+      }
+    });
+
+    if (promise) {
+      toast.promise(promise, {
+        loading: 'Enabling turbo mode...',
+        success: 'Turbo mode enabled',
+        error: 'Failed to enable turbo mode',
+      });
+    } else {
+      toast.error('Failed to enable turbo mode');
+    }
+  }
 
   function handleTurboMode() {
     if (!client) return;
@@ -19,21 +50,27 @@ export const Turbo: React.FC = () => {
       clearStoredSession();
       toast.success('Turbo mode disabled');
       setSession(null);
-    } else {
-      const promise = createAndStoreSession()?.then(session => {
-        if (session) {
-          setSession(session);
-        }
+      sendTransaction({
+        to: grindAddresses[abstractTestnet.id],
+        data: encodeFunctionData({
+          abi: grindAbi,
+          functionName: 'approve',
+          args: [addresses[abstractTestnet.id], 0n],
+        }),
       });
-
-      if (promise) {
-        toast.promise(promise, {
-          loading: 'Enabling turbo mode...',
-          success: 'Turbo mode enabled',
-          error: 'Failed to enable turbo mode',
-        });
+    } else {
+      if (grind.data?.allowance === maxUint256) {
+        enableTurboMode();
+        return;
       } else {
-        toast.error('Failed to enable turbo mode');
+        sendTransaction({
+          to: grindAddresses[abstractTestnet.id],
+          data: encodeFunctionData({
+            abi: grindAbi,
+            functionName: 'approve',
+            args: [addresses[abstractTestnet.id], maxUint256],
+          }),
+        });
       }
     }
   }

@@ -139,5 +139,6 @@ export function useSendTransaction(options: Options) {
 
   return {
     sendTransaction: transaction.mutate,
+    isPending: transaction.isPending,
   };
 }
