@@ -52,7 +52,7 @@ export const multipliers = [
   95000000n,
   97500000n,
   100000000n,
-];
+] as const;
 
 export interface BlockInfo {
   number: number;
