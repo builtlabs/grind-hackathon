@@ -15,6 +15,7 @@ import { cn, shorthandHex } from '@/lib/utils';
 import { toast } from 'sonner';
 import { formatUnits } from 'viem';
 import Link from 'next/link';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 
 export const Account: React.FC<{
   className?: string;
@@ -34,6 +35,7 @@ export const Account: React.FC<{
       }),
     },
   });
+  const { setValue: setSeenIntro } = useLocalStorage('builtlabs.hashcrash.intro', false);
 
   function handleLogout() {
     logout();
@@ -79,7 +81,7 @@ export const Account: React.FC<{
           <span>{shorthandHex(client?.account.address)}</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setSeenIntro(false)}>
           <LifeBuoy />
           <span>Support</span>
         </DropdownMenuItem>

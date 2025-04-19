@@ -26,8 +26,14 @@ import { abi, addresses } from '@/contracts/grind';
 import { abstractTestnet } from 'viem/chains';
 import { useTurboMode } from '@/hooks/use-turbo-mode';
 import Image from 'next/image';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 
 export const IntroDialog: React.FC = () => {
+  const {
+    value: seenIntro,
+    setValue: setSeenIntro,
+    isPending: seenIntroIsPending,
+  } = useLocalStorage('builtlabs.hashcrash.intro', false);
   const { data: client } = useAbstractClient();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
@@ -101,14 +107,11 @@ export const IntroDialog: React.FC = () => {
   }
 
   useEffect(() => {
-    const hasSeenIntro = localStorage.getItem('builtlabs.hashcrash.intro') === 'true';
-    if (!hasSeenIntro) {
+    if (!seenIntroIsPending && !seenIntro) {
       setOpen(true);
-      localStorage.setItem('builtlabs.hashcrash.intro', 'true');
+      setSeenIntro(true);
     }
-
-    setOpen(true);
-  }, []);
+  }, [seenIntro, seenIntroIsPending, setSeenIntro]);
 
   useEffect(() => {
     if (client && step === 0) {
@@ -153,7 +156,7 @@ export const IntroDialog: React.FC = () => {
               HashCrash
             </AlertDialogTitle>
 
-            <AlertDialogCancel>
+            <AlertDialogCancel onClick={() => setStep(0)}>
               Skip <span className="hidden sm:inline-block">Tutorial</span>
             </AlertDialogCancel>
           </div>
@@ -317,7 +320,7 @@ export const IntroDialog: React.FC = () => {
               </p>
 
               <AlertDialogFooter className="mt-auto">
-                <AlertDialogCancel>Skip Turbo Mode</AlertDialogCancel>
+                <AlertDialogCancel onClick={() => setStep(0)}>Skip Turbo Mode</AlertDialogCancel>
                 <Button onClick={handleTurboMode} disabled={sessionKeyIsPending}>
                   <Zap className={cn(session && 'fill-current')} />
                   {session ? 'disable turbo mode' : 'enable turbo mode'}
