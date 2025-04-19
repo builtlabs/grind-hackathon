@@ -96,10 +96,14 @@ export function useSendTransaction(options: Options) {
         }
       }
     },
-    onMutate() {
+    async onMutate() {
+      // Optimise this so we don't call it twice
+      const data = await getStoredSession();
       toast.loading('Sending Transaction', {
         id: options.key,
-        description: 'Approve the transaction in your Abstract wallet.',
+        description: data
+          ? 'Sending transaction with turbo mode!'
+          : 'Approve the transaction in your Abstract wallet.',
       });
     },
     onError(error) {
@@ -112,12 +116,12 @@ export function useSendTransaction(options: Options) {
     },
   });
 
-  const mintReceipt = useTransactionReceipt({
+  const receipt = useTransactionReceipt({
     hash: transaction.data,
   });
 
   useEffect(() => {
-    if (mintReceipt.isSuccess) {
+    if (receipt.isSuccess) {
       toast.success('Transaction Success', {
         id: options.key,
         description: 'Transaction was successful.',
@@ -127,7 +131,7 @@ export function useSendTransaction(options: Options) {
       transaction.reset();
     }
 
-    if (mintReceipt.isError) {
+    if (receipt.isError) {
       toast.error('Transaction Failed', {
         id: options.key,
         description: 'Transaction failed. Please try again.',
@@ -135,7 +139,7 @@ export function useSendTransaction(options: Options) {
       });
       transaction.reset();
     }
-  }, [mintReceipt.isSuccess, mintReceipt.isError, options, transaction]);
+  }, [receipt.isSuccess, receipt.isError, options, transaction]);
 
   return {
     sendTransaction: transaction.mutate,
