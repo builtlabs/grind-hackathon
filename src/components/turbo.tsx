@@ -11,6 +11,7 @@ import { abi as grindAbi, addresses as grindAddresses } from '@/contracts/grind'
 import { addresses } from '@/contracts/block-crash';
 import { useGrindBalance } from '@/hooks/use-grind-balance';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 
 export const Turbo: React.FC = () => {
   const { data: client } = useAbstractClient();
@@ -97,7 +98,7 @@ export const Turbo: React.FC = () => {
             size="sm"
             onClick={handleTurboMode}
           >
-            <Zap />
+            <Zap className={cn(session && 'fill-current')} />
             {session ? 'disable turbo mode' : 'enable turbo mode'}
           </Button>
         </TooltipTrigger>
