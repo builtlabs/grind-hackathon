@@ -88,10 +88,6 @@ export function useTurboMode(options?: { enabled?: boolean; onEnabled?: () => vo
   });
 
   function handleCreateSession() {
-    if (!client || !address) {
-      throw new Error('Client or address not available');
-    }
-
     if (grind.data?.allowance === maxUint256) {
       createSession.mutate();
     } else {
@@ -113,10 +109,6 @@ export function useTurboMode(options?: { enabled?: boolean; onEnabled?: () => vo
   }
 
   function handleClearSession() {
-    if (!client || !address) {
-      throw new Error('Client or address not available');
-    }
-
     clearSession.mutate();
   }
 
