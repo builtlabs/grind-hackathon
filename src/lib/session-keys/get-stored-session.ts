@@ -39,6 +39,8 @@ export const getStoredSession = async (
   chain: SupportedChain,
   createSessionAsync: (params: {
     session: SessionConfig;
+    paymaster?: Address;
+    paymasterInput?: Hex;
   }) => Promise<{ transactionHash?: `0x${string}`; session: SessionConfig }>
 ): Promise<{
   session: SessionConfig;

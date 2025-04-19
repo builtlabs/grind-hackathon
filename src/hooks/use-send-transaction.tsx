@@ -7,6 +7,8 @@ import { useTransactionReceipt } from 'wagmi';
 import { abstractTestnet } from 'viem/chains';
 import { privateKeyToAccount } from 'viem/accounts';
 import { useSessionKey } from './use-session-key';
+import { getGeneralPaymasterInput } from 'viem/zksync';
+import { PAYMASTER_ADDRESS } from '@/lib/paymaster';
 
 interface Options {
   key: string;
@@ -48,6 +50,10 @@ export function useSendTransaction(options: Options) {
         // Send without session
         return client.sendTransactionBatch({
           calls: Array.isArray(transaction) ? transaction : [transaction],
+          paymaster: PAYMASTER_ADDRESS,
+          paymasterInput: getGeneralPaymasterInput({
+            innerInput: '0x',
+          }),
         });
       } else {
         const signer = privateKeyToAccount(session.privateKey);
@@ -65,6 +71,10 @@ export function useSendTransaction(options: Options) {
               chain: abstractTestnet,
               to: tx.to as Address,
               data: tx.data as Hex,
+              paymaster: PAYMASTER_ADDRESS,
+              paymasterInput: getGeneralPaymasterInput({
+                innerInput: '0x',
+              }),
             });
           }
 
@@ -75,6 +85,10 @@ export function useSendTransaction(options: Options) {
             chain: abstractTestnet,
             to: transaction.to as Address,
             data: transaction.data as Hex,
+            paymaster: PAYMASTER_ADDRESS,
+            paymasterInput: getGeneralPaymasterInput({
+              innerInput: '0x',
+            }),
           });
         }
       }

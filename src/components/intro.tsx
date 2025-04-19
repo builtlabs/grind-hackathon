@@ -11,15 +11,12 @@ import {
 } from '@/components/ui/alert-dialog';
 
 import { useEffect, useState } from 'react';
-import { cn, shorthandHex } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { AuthButton } from './auth/button';
 import { Button } from './ui/button';
-import { ClipboardCopy, Zap } from 'lucide-react';
+import { Zap } from 'lucide-react';
 import { useAbstractClient } from '@abstract-foundation/agw-react';
-import { toast } from 'sonner';
-import { useBalance } from 'wagmi';
-import { encodeFunctionData, formatUnits } from 'viem';
-import Link from 'next/link';
+import { encodeFunctionData } from 'viem';
 import { useGrindBalance } from '@/hooks/use-grind-balance';
 import { useSendTransaction } from '@/hooks/use-send-transaction';
 import { abi, addresses } from '@/contracts/grind';
@@ -38,20 +35,6 @@ export const IntroDialog: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
 
-  const balance = useBalance({
-    address: client?.account?.address,
-    query: {
-      select: data => ({
-        formatted: Number(formatUnits(data.value, data.decimals)).toFixed(4),
-        symbol: data.symbol,
-        raw: data.value,
-      }),
-      refetchInterval: 10000,
-      enabled: !!client?.account?.address && step === 1,
-    },
-  });
-  const [balanceCountdown, setBalanceCountdown] = useState(0);
-
   const grind = useGrindBalance({
     enabled: !!client?.account?.address && step === 1,
   });
@@ -68,7 +51,7 @@ export const IntroDialog: React.FC = () => {
   } = useTurboMode({
     enabled: true,
     onEnabled() {
-      if (step === 3) {
+      if (step === 2) {
         setStep(0);
         setOpen(false);
       }
@@ -85,16 +68,8 @@ export const IntroDialog: React.FC = () => {
         }),
       },
       onSuccess() {
-        setStep(3);
+        setStep(2);
       },
-    });
-  }
-
-  function handleCopy() {
-    toast.promise(navigator.clipboard.writeText(client?.account.address ?? ''), {
-      loading: 'Copying address...',
-      success: 'Address copied to clipboard',
-      error: 'Failed to copy address',
     });
   }
 
@@ -119,26 +94,6 @@ export const IntroDialog: React.FC = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [client]);
-
-  useEffect(() => {
-    const targetTime = balance.dataUpdatedAt + 10000;
-
-    const interval = setInterval(() => {
-      const now = Date.now();
-      const remainingTime = targetTime - now;
-
-      if (remainingTime <= 0) {
-        setBalanceCountdown(0);
-        clearInterval(interval);
-      } else {
-        setBalanceCountdown(Math.ceil(remainingTime / 1000));
-      }
-    }, 1000);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [balance.dataUpdatedAt, balanceCountdown]);
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
@@ -178,7 +133,7 @@ export const IntroDialog: React.FC = () => {
           <Stage
             current={step}
             number={1}
-            label="Gas"
+            label="Betting"
             onClick={() => {
               setStep(1);
             }}
@@ -187,18 +142,9 @@ export const IntroDialog: React.FC = () => {
           <Stage
             current={step}
             number={2}
-            label="Betting"
-            onClick={() => {
-              setStep(2);
-            }}
-            disabled={!client || balance.isLoading || balance.isError || balance.data?.raw === 0n}
-          />
-          <Stage
-            current={step}
-            number={3}
             label="Turbo"
             onClick={() => {
-              setStep(3);
+              setStep(2);
             }}
             disabled={!client || grind.isLoading || grind.isError || grind.data?.raw === 0n}
           />
@@ -226,56 +172,6 @@ export const IntroDialog: React.FC = () => {
 
             {/* STEP 2 */}
             <div className="flex w-[100cqw] flex-none flex-col">
-              <h2 className="text-lg font-bold">Gas fees</h2>
-              <p className="text-xs">
-                To play HashCrash, you need to have some ETH in your wallet. You can get some ETH
-                from the Abstract testnet faucet; but we have found these to be unreliable.
-                <br />
-                <br />
-                We recommend using an{' '}
-                <Link
-                  className="underline"
-                  href="https://docs.abs.xyz/tooling/faucets#l1-sepolia-faucets"
-                >
-                  L1 Sepolia Faucet
-                </Link>{' '}
-                and then{' '}
-                <Link
-                  className="underline"
-                  href="https://native-bridge.abs.xyz/bridge/?network=abstract-testnet"
-                >
-                  bridging
-                </Link>{' '}
-                the funds to your Abstract account.
-                <br />
-                <br />
-                Address:{' '}
-                <span className="select-none">{shorthandHex(client?.account.address)}</span>
-                <br />
-                <span>
-                  Balance: {balance.isSuccess ? balance.data?.formatted : '0.00'} ETH (
-                  {balanceCountdown}s)
-                </span>
-              </p>
-
-              <AlertDialogFooter className="mt-auto">
-                <Button onClick={handleCopy} variant="outline">
-                  <ClipboardCopy />
-                  <span>{shorthandHex(client?.account.address)}</span>
-                </Button>
-                <Button
-                  onClick={() => {
-                    setStep(2);
-                  }}
-                  disabled={balance.isSuccess && balance.data?.raw === 0n}
-                >
-                  {balance.isSuccess && balance.data?.raw > 0 ? 'Continue' : 'You need more ETH'}
-                </Button>
-              </AlertDialogFooter>
-            </div>
-
-            {/* STEP 3 */}
-            <div className="flex w-[100cqw] flex-none flex-col">
               <h2 className="text-lg font-bold">How to place a bet</h2>
               <p className="text-xs">
                 HashCrash is a simple game where you place a bet on the outcome of a crash. You can
@@ -299,7 +195,7 @@ export const IntroDialog: React.FC = () => {
               </AlertDialogFooter>
             </div>
 
-            {/* STEP 4 */}
+            {/* STEP 3 */}
             <div className="flex w-[100cqw] flex-none flex-col">
               <h2 className="flex items-center gap-1 text-lg font-bold">
                 <Zap className="size-5 fill-current" /> Turbo Mode

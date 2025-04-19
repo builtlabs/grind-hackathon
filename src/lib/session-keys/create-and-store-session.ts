@@ -1,5 +1,5 @@
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
-import { Address, getAbiItem, parseEther, toFunctionSelector } from 'viem';
+import { Address, getAbiItem, Hex, parseEther, toFunctionSelector } from 'viem';
 import { LimitType, SessionConfig } from '@abstract-foundation/agw-client/sessions';
 import { LOCAL_STORAGE_KEY_PREFIX } from './constants';
 import { getEncryptionKey } from './get-encryption-key';
@@ -7,6 +7,8 @@ import { encrypt } from './encrypt-session';
 import { abi as blockCrashAbi, addresses as blockCrashAddresses } from '@/contracts/block-crash';
 import { abi as grindAbi, addresses as grindAddresses } from '@/contracts/grind';
 import { abstractTestnet } from 'viem/chains';
+import { getGeneralPaymasterInput } from 'viem/zksync';
+import { PAYMASTER_ADDRESS } from '../paymaster';
 
 /**
  * @function createAndStoreSession
@@ -39,6 +41,8 @@ export const createAndStoreSession = async (
   userAddress: Address,
   createSessionAsync: (params: {
     session: SessionConfig;
+    paymaster?: Address;
+    paymasterInput?: Hex;
   }) => Promise<{ transactionHash?: `0x${string}`; session: SessionConfig }>
 ): Promise<{
   session: SessionConfig;
@@ -51,6 +55,8 @@ export const createAndStoreSession = async (
     const sessionSigner = privateKeyToAccount(sessionPrivateKey);
 
     const { session } = await createSessionAsync({
+      paymaster: PAYMASTER_ADDRESS,
+      paymasterInput: getGeneralPaymasterInput({ innerInput: '0x' }),
       session: {
         signer: sessionSigner.address,
         expiresAt: BigInt(Math.floor(Date.now() / 1000) + 60 * 60 * 24),
@@ -60,17 +66,6 @@ export const createAndStoreSession = async (
           period: BigInt(0),
         },
         callPolicies: [
-          {
-            target: grindAddresses[abstractTestnet.id],
-            selector: toFunctionSelector(getAbiItem({ abi: grindAbi, name: 'mint' })),
-            valueLimit: {
-              limitType: LimitType.Unlimited,
-              limit: BigInt(0),
-              period: BigInt(0),
-            },
-            maxValuePerUse: BigInt(0),
-            constraints: [],
-          },
           // {
           //   target: grindAddresses[abstractTestnet.id],
           //   selector: toFunctionSelector(getAbiItem({ abi: grindAbi, name: 'approve' })),
@@ -121,6 +116,17 @@ export const createAndStoreSession = async (
           {
             target: blockCrashAddresses[abstractTestnet.id],
             selector: toFunctionSelector(getAbiItem({ abi: blockCrashAbi, name: 'cashEarly' })),
+            valueLimit: {
+              limitType: LimitType.Unlimited,
+              limit: BigInt(0),
+              period: BigInt(0),
+            },
+            maxValuePerUse: BigInt(0),
+            constraints: [],
+          },
+          {
+            target: grindAddresses[abstractTestnet.id],
+            selector: toFunctionSelector(getAbiItem({ abi: grindAbi, name: 'mint' })),
             valueLimit: {
               limitType: LimitType.Unlimited,
               limit: BigInt(0),

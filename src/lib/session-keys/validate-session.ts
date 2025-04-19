@@ -3,7 +3,7 @@ import { createAndStoreSession } from './create-and-store-session';
 import { SupportedChain } from './chain';
 import { abstractTestnet } from 'viem/chains';
 import type { AbstractClient } from '@abstract-foundation/agw-client';
-import type { Address } from 'viem';
+import type { Address, Hex } from 'viem';
 import type { SessionConfig } from '@abstract-foundation/agw-client/sessions';
 
 /**
@@ -34,6 +34,8 @@ export const validateSession = async (
   chain: SupportedChain,
   createSessionAsync: (params: {
     session: SessionConfig;
+    paymaster?: Address;
+    paymasterInput?: Hex;
   }) => Promise<{ transactionHash?: `0x${string}`; session: SessionConfig }>
 ): Promise<boolean> => {
   try {
