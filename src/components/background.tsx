@@ -49,11 +49,21 @@ const MatrixRainBackground: React.FC = () => {
       renderState.current.mode = 'idle';
     }
 
-    if (state.start + multipliers.length - 1 === number) {
+    if (
+      renderState.current.mode === 'running' &&
+      state.start &&
+      state.start + multipliers.length - 1 <= number
+    ) {
       renderState.current.mode = 'idle';
     }
 
-    if (state.start && !state.end && state.start <= number) {
+    if (
+      renderState.current.mode === 'idle' &&
+      state.start &&
+      !state.end &&
+      state.start <= number &&
+      state.start + multipliers.length - 1 > number
+    ) {
       renderState.current.mode = 'running';
     }
   }, [state, number]);
