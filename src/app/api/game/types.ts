@@ -8,5 +8,6 @@ export type ContractState = {
     user: `0x${string}`;
     amount: string;
     cashoutIndex: number;
+    cancelled: boolean;
   }[];
 };

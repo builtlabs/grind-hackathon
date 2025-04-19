@@ -8,25 +8,29 @@ import { ContractState } from './types';
 const getState = cache(
   async (blockNumber: number): Promise<ContractState> => {
     console.log('Fetching state from contract...', blockNumber);
-    const [[start, end, liquidity], history, bets] = await Promise.all([
-      publicClient.readContract({
-        abi,
-        address: addresses[abstractTestnet.id],
-        functionName: 'getRoundInfo',
-        blockNumber: BigInt(blockNumber),
-      }),
-      publicClient.readContract({
-        abi,
-        address: addresses[abstractTestnet.id],
-        functionName: 'getHistory',
-        args: [7n],
-      }),
-      publicClient.readContract({
-        abi,
-        address: addresses[abstractTestnet.id],
-        functionName: 'getBets',
-      }),
-    ]);
+    const [[start, end, liquidity], history, bets] = await publicClient.multicall({
+      contracts: [
+        {
+          abi,
+          address: addresses[abstractTestnet.id],
+          functionName: 'getRoundInfo',
+        },
+        {
+          abi,
+          address: addresses[abstractTestnet.id],
+          functionName: 'getHistory',
+          args: [7n],
+        },
+        {
+          abi,
+          address: addresses[abstractTestnet.id],
+          functionName: 'getBets',
+        },
+      ],
+      allowFailure: false,
+      multicallAddress: abstractTestnet.contracts.multicall3.address,
+      blockNumber: BigInt(blockNumber),
+    });
 
     return {
       current: blockNumber,
@@ -38,6 +42,7 @@ const getState = cache(
         user: bet.user,
         amount: bet.amount.toString(),
         cashoutIndex: Number(bet.cashoutIndex),
+        cancelled: bet.cancelled,
       })),
     };
   },
