@@ -150,7 +150,7 @@ export const IntroDialog: React.FC = () => {
           />
         </div>
 
-        <div className="scrollbar-hidden @container w-full overflow-y-auto sm:h-72">
+        <div className="scrollbar-hidden @container w-full overflow-x-hidden overflow-y-auto sm:h-72">
           <div
             className="flex h-full gap-10 transition-transform duration-500"
             style={{
