@@ -256,20 +256,19 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
         )}
 
         {!myBets.length && (
-          <>
-            <p className="text-muted-foreground text-xs">
-              Your bets will be displayed here after placing them
-            </p>
-            <Image
-              src="https://grind.bearish.af/GrindMath01.gif"
-              alt="Grind Math"
-              width={540}
-              height={540}
-              unoptimized
-              className="mt-auto size-32"
-            />
-          </>
+          <p className="text-muted-foreground text-xs">
+            Your bets will be displayed here after placing them
+          </p>
         )}
+
+        <Image
+          src="https://grind.bearish.af/GrindMath01.gif"
+          alt="Grind Math"
+          width={540}
+          height={540}
+          unoptimized
+          className="mt-auto size-32"
+        />
       </div>
     </div>
   );
