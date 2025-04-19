@@ -45,7 +45,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const oldState = previous.data && game.data && !game.data?.start;
 
-  const data: GameData = useMemo(() => {
+  const value: GameData = useMemo(() => {
     return {
       state: oldState
         ? {
@@ -58,7 +58,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [game.data, previous.data, oldState]);
 
-  return <GameContext.Provider value={data}>{children}</GameContext.Provider>;
+  return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
 };
 
 export function useGame() {

@@ -2,7 +2,7 @@
 
 import { env } from '@/env.mjs';
 import { Alchemy, Network } from 'alchemy-sdk';
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
 const alchemy = new Alchemy({
   apiKey: env.NEXT_PUBLIC_ALCHEMY_API_KEY,
@@ -37,7 +37,9 @@ export const BlockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
   }, []);
 
-  return <BlockContext.Provider value={{ number: block }}>{children}</BlockContext.Provider>;
+  const value: BlockData = useMemo(() => ({ number: block }), [block]);
+
+  return <BlockContext.Provider value={value}>{children}</BlockContext.Provider>;
 };
 
 export function useBlock() {
