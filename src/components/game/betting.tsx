@@ -253,7 +253,7 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
           <div className="w-full">
             <Table className="border-separate border-spacing-y-2">
               <TableHeader>
-                <TableRow className="text-xs *:data-[slot=table-head]:h-6">
+                <TableRow className="bg-transparent text-xs backdrop-blur-none *:data-[slot=table-head]:h-6">
                   <TableHead>Amount</TableHead>
                   <TableHead>Multiplier</TableHead>
                   <TableHead>Profit</TableHead>
