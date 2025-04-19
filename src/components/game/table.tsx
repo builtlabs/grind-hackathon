@@ -57,14 +57,13 @@ export const GameTable: React.FC<GameTableProps> = ({ className }) => {
 
       <div
         className={cn(
-          'bg-muted/20 scrollbar-hidden flex grow flex-col items-center overflow-y-auto rounded border p-4 backdrop-blur-md',
-          state?.bets.length === 0 && 'pb-0'
+          'bg-muted/20 scrollbar-hidden flex grow flex-col items-center overflow-y-auto rounded border p-4 pb-0 backdrop-blur-md'
         )}
       >
         <div className="w-full">
           <Table className="border-separate border-spacing-y-2">
             <TableHeader>
-              <TableRow className="*:data-[slot=table-head]:h-6">
+              <TableRow className="text-xs *:data-[slot=table-head]:h-6">
                 <TableHead>User</TableHead>
                 <TableHead>Amount</TableHead>
                 <TableHead>Multiplier</TableHead>
@@ -78,14 +77,34 @@ export const GameTable: React.FC<GameTableProps> = ({ className }) => {
                 const multiplier = multipliers[bet.cashoutIndex];
                 const profit = formatUnits((bigAmount * multiplier) / BigInt(1e6) - bigAmount, 18);
                 return (
-                  <TableRow key={i} className="text-xs">
+                  <TableRow
+                    key={i}
+                    className={cn(
+                      'text-xs',
+                      number && state.start && number > state.start && crashed && 'bg-red-500/20',
+                      number &&
+                        state.start &&
+                        number > state.start &&
+                        !crashed &&
+                        'bg-green-500/20',
+                      bet.cancelled && 'bg-muted text-muted-foreground line-through opacity-50'
+                    )}
+                  >
                     <TableCell>{shorthandHex(bet.user)}</TableCell>
                     <TableCell>{formatUnits(bigAmount, 18)}</TableCell>
                     <TableCell>
-                      <MultiplierBadge multiplier={multiplier} />
+                      <MultiplierBadge
+                        multiplier={multiplier}
+                        variant={bet.cancelled ? 'outline' : undefined}
+                      />
                     </TableCell>
 
-                    <TableCell className={cn(crashed ? 'text-red-500' : 'text-green-500')}>
+                    <TableCell
+                      className={cn(
+                        crashed ? 'text-red-500' : 'text-green-500',
+                        bet.cancelled && 'text-muted-foreground line-through'
+                      )}
+                    >
                       {profit}
                     </TableCell>
                   </TableRow>

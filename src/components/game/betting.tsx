@@ -12,19 +12,13 @@ import {
   Chain,
   encodeFunctionData,
   formatUnits,
+  isAddressEqual,
   parseUnits,
   SendTransactionParameters,
 } from 'viem';
 import { abi, addresses } from '@/contracts/block-crash';
 import { abi as grindAbi, addresses as grindAddresses } from '@/contracts/grind';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { formatMultiplier, multipliers, stateCountdown, stillAlive } from '@/lib/block-crash';
+import { multipliers, stateCountdown, stillAlive } from '@/lib/block-crash';
 import { useGame } from '../providers/game';
 import { toast } from 'sonner';
 import { useBlock } from '../providers/block';
@@ -34,7 +28,16 @@ import Image from 'next/image';
 import { useAbstractClient } from '@abstract-foundation/agw-react';
 import { MultiplierBadge } from './multiplier';
 import { Turbo } from '../turbo';
-
+import { ContractState } from '@/app/api/game/types';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { MultiplierInput } from '../input/multiplier';
 interface BettingProps {
   className?: string;
 }
@@ -50,12 +53,17 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
   const myBets = useMemo(() => {
     if (!state || !client) return [];
 
-    return state.bets.filter(bet => bet.user === client.account.address);
+    // filter the bets but retain the original index
+    return state.bets.reduce(
+      (acc, bet, index) =>
+        isAddressEqual(bet.user, client.account.address) ? [...acc, { ...bet, index }] : acc,
+      [] as (ContractState['bets'][number] & { index: number })[]
+    );
   }, [state, client]);
   const [ended, setEnded] = useState(false);
   const grind = useGrindBalance();
   const { sendTransaction, isPending } = useSendTransaction({
-    key: 'place-bet',
+    key: 'bets',
     onSuccess: grind.refetch,
   });
 
@@ -113,6 +121,40 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
         }),
       });
     }
+
+    sendTransaction(transactions);
+  }
+
+  function handleCashout(index: number) {
+    if (!state) return;
+
+    const transactions: SendTransactionParameters<Chain, Account>[] = [
+      {
+        to: addresses[abstractTestnet.id],
+        data: encodeFunctionData({
+          abi,
+          functionName: 'cashEarly',
+          args: [BigInt(index)],
+        }),
+      },
+    ];
+
+    sendTransaction(transactions);
+  }
+
+  function handleCancel(index: number) {
+    if (!state) return;
+
+    const transactions: SendTransactionParameters<Chain, Account>[] = [
+      {
+        to: addresses[abstractTestnet.id],
+        data: encodeFunctionData({
+          abi,
+          functionName: 'cancelBet',
+          args: [BigInt(index)],
+        }),
+      },
+    ];
 
     sendTransaction(transactions);
   }
@@ -184,18 +226,7 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
             <Label htmlFor="multiplier" className="mb-1">
               Auto Cashout
             </Label>
-            <Select name="multiplier" defaultValue="49">
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {multipliers.map((multiplier, index) => (
-                  <SelectItem key={multiplier} value={index.toString()}>
-                    {formatMultiplier(multiplier)}x
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <MultiplierInput />
           </div>
 
           <div className="flex flex-col">
@@ -214,44 +245,103 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
       </div>
       <div
         className={cn(
-          'bg-muted/20 scrollbar-hidden flex h-min grow flex-col items-center gap-3 overflow-y-auto rounded border p-4 backdrop-blur-md',
-          myBets.length === 0 && 'pb-0',
+          'bg-muted/20 scrollbar-hidden flex h-min grow flex-col items-center gap-3 overflow-y-auto rounded border p-4 pb-0 backdrop-blur-md',
           className
         )}
       >
         <h2 className="text-xl font-bold">{oldState ? `Previous Round` : 'Your Bets'}</h2>
         {state && myBets.length > 0 && (
-          <div className="flex w-full flex-col gap-2 text-xs">
-            <div className="flex items-center justify-between px-1">
-              <span className="text-muted-foreground text-xs">Amount</span>
-              <span className="text-muted-foreground text-xs">Multiplier</span>
-              <span className="text-muted-foreground text-xs">Profit</span>
-            </div>
-            {myBets.map((bet, index) => {
-              const crashed = !stillAlive(bet, state);
-              const bigAmount = BigInt(bet.amount);
-              const multiplier = multipliers[bet.cashoutIndex];
-              const profit = formatUnits((bigAmount * multiplier) / BigInt(1e6) - bigAmount, 18);
+          <div className="w-full">
+            <Table className="border-separate border-spacing-y-2">
+              <TableHeader>
+                <TableRow className="text-xs *:data-[slot=table-head]:h-6">
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Multiplier</TableHead>
+                  <TableHead>Profit</TableHead>
+                  <TableHead>
+                    <span className="sr-only">Actions</span>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {myBets.map(bet => {
+                  const crashed = !stillAlive(bet, state);
+                  const bigAmount = BigInt(bet.amount);
+                  const multiplier = multipliers[bet.cashoutIndex];
+                  const profit = formatUnits(
+                    (bigAmount * multiplier) / BigInt(1e6) - bigAmount,
+                    18
+                  );
+                  return (
+                    <TableRow
+                      key={bet.index}
+                      className={cn(
+                        'text-xs',
+                        number && state.start && number > state.start && crashed && 'bg-red-500/20',
+                        number &&
+                          state.start &&
+                          number > state.start &&
+                          !crashed &&
+                          'bg-green-500/20',
+                        bet.cancelled && 'bg-muted text-muted-foreground line-through opacity-50'
+                      )}
+                    >
+                      <TableCell>{formatUnits(bigAmount, 18)}</TableCell>
+                      <TableCell>
+                        <MultiplierBadge
+                          multiplier={multiplier}
+                          variant={bet.cancelled ? 'outline' : undefined}
+                        />
+                      </TableCell>
 
-              return (
-                <div
-                  key={index}
-                  className={cn(
-                    'flex w-full items-center justify-between rounded border p-2',
-                    crashed ? 'bg-red-500/20' : 'bg-green-500/20'
-                  )}
-                >
-                  <span>{formatUnits(bigAmount, 18)}</span>
-                  <MultiplierBadge
-                    key={index}
-                    multiplier={multiplier}
-                    variant={crashed ? 'destructive' : undefined}
-                  />
-                  <span className={cn(crashed ? 'text-red-500' : 'text-green-500')}>{profit}</span>
-                  {/* TODO: cancel/cash out */}
-                </div>
-              );
-            })}
+                      <TableCell
+                        className={cn(
+                          crashed ? 'text-red-500' : 'text-green-500',
+                          bet.cancelled && 'text-muted-foreground line-through'
+                        )}
+                      >
+                        {profit}
+                      </TableCell>
+                      <TableCell>
+                        {!bet.cancelled && number && state.start && number > state.start ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-min w-min p-0 text-xs"
+                            onClick={handleCashout.bind(null, bet.index)}
+                            disabled={
+                              isPending ||
+                              crashed ||
+                              bet.cancelled ||
+                              number > state.start + bet.cashoutIndex
+                            }
+                          >
+                            Cash out
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-min w-min p-0 text-xs"
+                            onClick={handleCancel.bind(null, bet.index)}
+                            disabled={isPending || bet.cancelled}
+                          >
+                            Cancel
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+                {myBets.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-muted-foreground text-center">
+                      You have no bets placed
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
           </div>
         )}
 

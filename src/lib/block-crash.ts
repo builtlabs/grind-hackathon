@@ -142,9 +142,11 @@ export function stillAlive(
 }
 
 export function stillGrinding(
-  bet: { cashoutIndex: number },
+  bet: { cashoutIndex: number; cancelled: boolean },
   state: { start: number; end?: number },
   blockNumber?: number
 ): boolean {
-  return !!blockNumber && !state.end && state.start + bet.cashoutIndex > blockNumber;
+  return (
+    !!blockNumber && !state.end && state.start + bet.cashoutIndex > blockNumber && !bet.cancelled
+  );
 }

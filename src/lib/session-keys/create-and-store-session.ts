@@ -107,6 +107,28 @@ export const createAndStoreSession = async (
             maxValuePerUse: BigInt(0),
             constraints: [],
           },
+          {
+            target: blockCrashAddresses[abstractTestnet.id],
+            selector: toFunctionSelector(getAbiItem({ abi: blockCrashAbi, name: 'cancelBet' })),
+            valueLimit: {
+              limitType: LimitType.Unlimited,
+              limit: BigInt(0),
+              period: BigInt(0),
+            },
+            maxValuePerUse: BigInt(0),
+            constraints: [],
+          },
+          {
+            target: blockCrashAddresses[abstractTestnet.id],
+            selector: toFunctionSelector(getAbiItem({ abi: blockCrashAbi, name: 'cashEarly' })),
+            valueLimit: {
+              limitType: LimitType.Unlimited,
+              limit: BigInt(0),
+              period: BigInt(0),
+            },
+            maxValuePerUse: BigInt(0),
+            constraints: [],
+          },
         ],
         transferPolicies: [],
       },
