@@ -174,7 +174,7 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
   }, [ended, grind, number, oldState, state]);
 
   return (
-    <div className={cn('flex w-full flex-none flex-col gap-5 xl:w-xs', className)}>
+    <div className={cn('flex w-full flex-none flex-col gap-5 xl:w-[340px]', className)}>
       <div className="bg-muted/20 flex h-min flex-col items-center rounded border p-4 backdrop-blur-md">
         <h2 className="text-xl font-bold">Place a Bet</h2>
 
