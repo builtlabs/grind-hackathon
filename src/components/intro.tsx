@@ -36,7 +36,7 @@ export const IntroDialog: React.FC = () => {
   const [step, setStep] = useState(0);
 
   const grind = useGrindBalance({
-    enabled: !!client?.account?.address && step === 1,
+    enabled: !!client?.account?.address && step === 2,
   });
 
   const { sendTransaction, isPending } = useSendTransaction({
@@ -51,9 +51,8 @@ export const IntroDialog: React.FC = () => {
   } = useTurboMode({
     enabled: true,
     onEnabled() {
-      if (step === 2) {
-        setStep(0);
-        setOpen(false);
+      if (step === 1) {
+        setStep(2);
       }
     },
   });
@@ -68,7 +67,9 @@ export const IntroDialog: React.FC = () => {
         }),
       },
       onSuccess() {
-        setStep(2);
+        grind.refetch();
+        setStep(0);
+        setOpen(false);
       },
     });
   }
@@ -133,7 +134,7 @@ export const IntroDialog: React.FC = () => {
           <Stage
             current={step}
             number={1}
-            label="Betting"
+            label="Turbo"
             onClick={() => {
               setStep(1);
             }}
@@ -142,11 +143,11 @@ export const IntroDialog: React.FC = () => {
           <Stage
             current={step}
             number={2}
-            label="Turbo"
+            label="Betting"
             onClick={() => {
               setStep(2);
             }}
-            disabled={!client || grind.isLoading || grind.isError || grind.data?.raw === 0n}
+            disabled={!client}
           />
         </div>
 
@@ -172,31 +173,6 @@ export const IntroDialog: React.FC = () => {
 
             {/* STEP 2 */}
             <div className="flex w-[100cqw] flex-none flex-col">
-              <h2 className="text-lg font-bold">How to place a bet</h2>
-              <p className="text-xs">
-                HashCrash is a simple game where you place a bet on the outcome of a crash. You can
-                place a bet by selecting the amount you want to bet and the maximum multiplier you
-                want to bet on; remember you can cash out at any time.
-                <br />
-                <br />
-                To play HashCrash, you need to have some GRIND in your wallet. You can mint some
-                GRIND from the contract.
-                <br />
-                <br />
-                <span>Balance: {grind.isSuccess ? grind.data?.formatted : '0.00'} GRIND</span>
-                <br />
-                <br />
-              </p>
-
-              <AlertDialogFooter className="mt-auto">
-                <Button onClick={handleMint} disabled={isPending}>
-                  Mint $GRIND
-                </Button>
-              </AlertDialogFooter>
-            </div>
-
-            {/* STEP 3 */}
-            <div className="flex w-[100cqw] flex-none flex-col">
               <h2 className="flex items-center gap-1 text-lg font-bold">
                 <Zap className="size-5 fill-current" /> Turbo Mode
               </h2>
@@ -216,10 +192,37 @@ export const IntroDialog: React.FC = () => {
               </p>
 
               <AlertDialogFooter className="mt-auto">
-                <AlertDialogCancel onClick={() => setStep(0)}>Skip Turbo Mode</AlertDialogCancel>
+                <Button variant="outline" onClick={() => setStep(2)}>
+                  Skip Turbo Mode
+                </Button>
                 <Button onClick={handleTurboMode} disabled={sessionKeyIsPending}>
                   <Zap className={cn(session && 'fill-current')} />
                   {session ? 'disable turbo mode' : 'enable turbo mode'}
+                </Button>
+              </AlertDialogFooter>
+            </div>
+
+            {/* STEP 3 */}
+            <div className="flex w-[100cqw] flex-none flex-col">
+              <h2 className="text-lg font-bold">How to place a bet</h2>
+              <p className="text-xs">
+                HashCrash is a simple game where you place a bet on the outcome of a crash. You can
+                place a bet by selecting the amount you want to bet and the maximum multiplier you
+                want to bet on; remember you can cash out at any time.
+                <br />
+                <br />
+                To play HashCrash, you need to have some GRIND in your wallet. You can mint some
+                GRIND from the contract.
+                <br />
+                <br />
+                <span>Balance: {grind.isSuccess ? grind.data?.formatted : '0.00'} GRIND</span>
+                <br />
+                <br />
+              </p>
+
+              <AlertDialogFooter className="mt-auto">
+                <Button onClick={handleMint} disabled={isPending}>
+                  Mint $GRIND
                 </Button>
               </AlertDialogFooter>
             </div>
