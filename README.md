@@ -6,6 +6,7 @@
 - Use the $GRIND font
 - Built labs rocket logo
 - Tidy the footer
+- Support option on account dropdown
 
 ## Documentation
 - open graph images
