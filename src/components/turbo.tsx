@@ -10,6 +10,7 @@ import { encodeFunctionData, maxUint256 } from 'viem';
 import { abi as grindAbi, addresses as grindAddresses } from '@/contracts/grind';
 import { addresses } from '@/contracts/block-crash';
 import { useGrindBalance } from '@/hooks/use-grind-balance';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export const Turbo: React.FC = () => {
   const { data: client } = useAbstractClient();
@@ -86,15 +87,27 @@ export const Turbo: React.FC = () => {
   if (!client) return null;
 
   return (
-    <Button
-      variant="link"
-      type="button"
-      className="text-muted-foreground ml-auto text-xs"
-      size="sm"
-      onClick={handleTurboMode}
-    >
-      <Zap />
-      {session ? 'disable turbo mode' : 'enable turbo mode'}
-    </Button>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="link"
+            type="button"
+            className="text-muted-foreground mt-1 ml-auto h-min text-xs"
+            size="sm"
+            onClick={handleTurboMode}
+          >
+            <Zap />
+            {session ? 'disable turbo mode' : 'enable turbo mode'}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent className="w-64" side="bottom">
+          <p>
+            Turbo mode uses session keys to send transactions without confirmation, allowing you to
+            place bets and cash out quicker!
+          </p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
