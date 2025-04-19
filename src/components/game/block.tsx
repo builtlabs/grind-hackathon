@@ -1,12 +1,12 @@
 'use client';
 
-import { cn } from '@/lib/utils';
 import { useGame } from '../providers/game';
 import { useBlock } from '../providers/block';
 import { useEffect, useState } from 'react';
 import { BlockInfo, createBlock, formatMultiplier } from '@/lib/block-crash';
 import Image from 'next/image';
 import { MultiplierBadge } from './multiplier';
+import { cn } from '@/lib/utils';
 
 export const GameBlock: React.FC = () => {
   const { number } = useBlock();
@@ -34,10 +34,9 @@ export const GameBlock: React.FC = () => {
     <div className="flex flex-col items-center justify-between gap-5">
       <div className="flex h-28 flex-col items-center">
         <p className="text-base">Current Multiplier</p>
-
         <p className="text-7xl font-bold">
           {blocks[2]?.result === 'none' && '--'}
-          {blocks[2]?.result === 'ok' && <>{formatMultiplier(blocks[2].multiplier)}x</>}
+          {blocks[2]?.result === 'ok' && `${formatMultiplier(blocks[2].multiplier)}x`}
           {blocks[2]?.result === 'crash' && <span className="text-[#941818]">CRASH</span>}
         </p>
       </div>
@@ -77,10 +76,9 @@ interface BlockProps {
 const Block: React.FC<BlockProps> = ({ block, index }) => {
   return (
     <div
-      key={block.number}
       className={cn(
         'absolute flex size-full flex-none flex-col items-center rounded border-4 p-4',
-        'transition-all duration-1000 ease-in-out',
+        'transition-transform duration-300 ease-in-out',
         index === 0 && '-z-20 scale-0',
         index === 1 && '-z-10 -translate-x-1/2 scale-80',
         index === 2 && 'z-10 scale-100',
@@ -94,7 +92,7 @@ const Block: React.FC<BlockProps> = ({ block, index }) => {
       <p className="text-muted-foreground text-sm font-medium">#{block.number}</p>
       <p className="absolute top-1/2 -translate-y-1/2 text-4xl font-bold">
         {block.result === 'none' && '--'}
-        {block.result === 'ok' && <>{formatMultiplier(block.multiplier)}x</>}
+        {block.result === 'ok' && `${formatMultiplier(block.multiplier)}x`}
         {block.result === 'crash' && <span className="text-[#941818]">CRASH</span>}
       </p>
     </div>
