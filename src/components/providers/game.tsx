@@ -3,7 +3,7 @@
 import { ContractState } from '@/app/api/game/types';
 import { fetcher } from '@/lib/fetch';
 import { useQuery } from '@tanstack/react-query';
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useBlock } from './block';
 import { multipliers } from '@/lib/block-crash';
 
@@ -45,16 +45,18 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const oldState = previous.data && game.data && !game.data?.start;
 
-  const data: GameData = {
-    state: oldState
-      ? {
-          ...previous.data,
-          history: game.data.history,
-          liquidity: game.data.liquidity,
-        }
-      : game.data,
-    oldState: oldState,
-  };
+  const data: GameData = useMemo(() => {
+    return {
+      state: oldState
+        ? {
+            ...previous.data,
+            history: game.data.history,
+            liquidity: game.data.liquidity,
+          }
+        : game.data,
+      oldState: oldState,
+    };
+  }, [game.data, previous.data, oldState]);
 
   return <GameContext.Provider value={data}>{children}</GameContext.Provider>;
 };
