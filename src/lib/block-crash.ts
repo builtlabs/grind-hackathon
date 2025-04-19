@@ -147,6 +147,6 @@ export function stillGrinding(
   blockNumber?: number
 ): boolean {
   return (
-    !!blockNumber && !state.end && state.start + bet.cashoutIndex > blockNumber && !bet.cancelled
+    !!blockNumber && !state.end && state.start + bet.cashoutIndex >= blockNumber && !bet.cancelled
   );
 }
