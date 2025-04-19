@@ -12,16 +12,18 @@ interface MintProps {
 export const Mint: React.FC<MintProps> = ({ onSuccess, disabled }) => {
   const { sendTransaction, isPending } = useSendTransaction({
     key: 'mint-grind',
-    onSuccess,
   });
 
   function handleMint() {
     sendTransaction({
-      to: addresses[abstractTestnet.id],
-      data: encodeFunctionData({
-        abi,
-        functionName: 'mint',
-      }),
+      transaction: {
+        to: addresses[abstractTestnet.id],
+        data: encodeFunctionData({
+          abi,
+          functionName: 'mint',
+        }),
+      },
+      onSuccess,
     });
   }
 

@@ -8,12 +8,10 @@ import {
 } from '@/components/ui/select';
 
 export const MultiplierInput: React.FC = () => {
-  const defaultIdx = (multipliers.length - 1).toString();
-
   return (
-    <Select name="multiplier" defaultValue={defaultIdx}>
+    <Select name="multiplier">
       <SelectTrigger className="w-full">
-        <SelectValue placeholder="100x" />
+        <SelectValue placeholder="Select multiplier" />
       </SelectTrigger>
       <SelectContent>
         {multipliers.map((multiplier, index) => (

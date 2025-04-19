@@ -5,7 +5,7 @@ import { Address, formatUnits } from 'viem';
 import { abstractTestnet } from 'viem/chains';
 import { useReadContracts } from 'wagmi';
 
-export function useGrindBalance() {
+export function useGrindBalance(options?: { enabled?: boolean }) {
   const { data: client } = useAbstractClient();
 
   return useReadContracts({
@@ -35,7 +35,7 @@ export function useGrindBalance() {
       },
     ],
     query: {
-      enabled: !!client,
+      enabled: Boolean(client) && options?.enabled !== undefined ? options.enabled : true,
       select(data) {
         const formatted = formatUnits(data[0], data[1]);
 

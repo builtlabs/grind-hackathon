@@ -64,7 +64,6 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
   const grind = useGrindBalance();
   const { sendTransaction, isPending } = useSendTransaction({
     key: 'bets',
-    onSuccess: grind.refetch,
   });
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -100,7 +99,7 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
       return;
     }
 
-    const transactions: SendTransactionParameters<Chain, Account>[] = [
+    const transaction: SendTransactionParameters<Chain, Account>[] = [
       {
         to: addresses[abstractTestnet.id],
         data: encodeFunctionData({
@@ -112,7 +111,7 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
     ];
 
     if (grind.data.allowance < bigAmount) {
-      transactions.unshift({
+      transaction.unshift({
         to: grindAddresses[abstractTestnet.id],
         data: encodeFunctionData({
           abi: grindAbi,
@@ -122,13 +121,13 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
       });
     }
 
-    sendTransaction(transactions);
+    sendTransaction({ transaction, onSuccess: grind.refetch });
   }
 
   function handleCashout(index: number) {
     if (!state) return;
 
-    const transactions: SendTransactionParameters<Chain, Account>[] = [
+    const transaction: SendTransactionParameters<Chain, Account>[] = [
       {
         to: addresses[abstractTestnet.id],
         data: encodeFunctionData({
@@ -139,13 +138,13 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
       },
     ];
 
-    sendTransaction(transactions);
+    sendTransaction({ transaction });
   }
 
   function handleCancel(index: number) {
     if (!state) return;
 
-    const transactions: SendTransactionParameters<Chain, Account>[] = [
+    const transaction: SendTransactionParameters<Chain, Account>[] = [
       {
         to: addresses[abstractTestnet.id],
         data: encodeFunctionData({
@@ -156,7 +155,7 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
       },
     ];
 
-    sendTransaction(transactions);
+    sendTransaction({ transaction, onSuccess: grind.refetch });
   }
 
   useEffect(() => {

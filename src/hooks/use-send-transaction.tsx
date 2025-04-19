@@ -4,26 +4,28 @@ import { useEffect } from 'react';
 import { toast } from 'sonner';
 import { Account, Address, Chain, Hex, SendTransactionParameters } from 'viem';
 import { useTransactionReceipt } from 'wagmi';
-import { useAbstractSession } from './use-abstract-session';
 import { abstractTestnet } from 'viem/chains';
 import { privateKeyToAccount } from 'viem/accounts';
+import { useSessionKey } from './use-session-key';
 
 interface Options {
   key: string;
-  onSuccess?: () => void;
 }
 
 export function useSendTransaction(options: Options) {
   const { data: client, isPending, error } = useAbstractClient();
-  const { getStoredSession } = useAbstractSession(abstractTestnet);
+  const { data: session, isPending: isPendingSession } = useSessionKey();
 
   const transaction = useMutation({
     mutationKey: [options.key],
-    mutationFn: async (
+    mutationFn: async ({
+      transaction,
+    }: {
       transaction:
         | SendTransactionParameters<Chain, Account>
-        | SendTransactionParameters<Chain, Account>[]
-    ) => {
+        | SendTransactionParameters<Chain, Account>[];
+      onSuccess?: () => void;
+    }) => {
       if (isPending) {
         toast.error('Connect Abstract', {
           id: options.key,
@@ -42,17 +44,15 @@ export function useSendTransaction(options: Options) {
         return;
       }
 
-      const data = await getStoredSession();
-
-      if (!data) {
+      if (!session) {
         // Send without session
         return client.sendTransactionBatch({
           calls: Array.isArray(transaction) ? transaction : [transaction],
         });
       } else {
-        const signer = privateKeyToAccount(data.privateKey);
+        const signer = privateKeyToAccount(session.privateKey);
 
-        const sessionClient = client.toSessionClient(signer, data.session);
+        const sessionClient = client.toSessionClient(signer, session.session);
         if (Array.isArray(transaction)) {
           sessionClient.batch = {
             multicall: true,
@@ -69,23 +69,6 @@ export function useSendTransaction(options: Options) {
           }
 
           return hash;
-
-          // return sessionClient.sendTransaction({
-          //   account: sessionClient.account,
-          //   chain: abstractTestnet,
-          //   to: addresses[abstractTestnet.id],
-          //   data: encodeFunctionData({
-          //     abi,
-          //     functionName: 'aggregate3',
-          //     args: [
-          //       transaction.map(tx => ({
-          //         target: tx.to as Address,
-          //         callData: tx.data as Hex,
-          //         allowFailure: false,
-          //       })),
-          //     ],
-          //   }),
-          // });
         } else {
           return sessionClient.sendTransaction({
             account: sessionClient.account,
@@ -97,11 +80,9 @@ export function useSendTransaction(options: Options) {
       }
     },
     async onMutate() {
-      // Optimise this so we don't call it twice
-      const data = await getStoredSession();
       toast.loading('Sending Transaction', {
         id: options.key,
-        description: data
+        description: session
           ? 'Sending transaction with turbo mode!'
           : 'Approve the transaction in your Abstract wallet.',
       });
@@ -127,7 +108,7 @@ export function useSendTransaction(options: Options) {
         description: 'Transaction was successful.',
         duration: 2000,
       });
-      options.onSuccess?.();
+      transaction.variables?.onSuccess?.();
       transaction.reset();
     }
 
@@ -143,6 +124,6 @@ export function useSendTransaction(options: Options) {
 
   return {
     sendTransaction: transaction.mutate,
-    isPending: transaction.isPending,
+    isPending: transaction.isPending || receipt.isLoading || isPending || isPendingSession,
   };
 }
