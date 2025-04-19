@@ -66,7 +66,8 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
 
     const formData = new FormData(e.currentTarget);
     const amount = formData.get('amount') as string;
-    const multiplier = formData.get('multiplier') as string;
+    const cashoutIndex = formData.get('multiplier') as string;
+    const multiplier = multipliers[Number(cashoutIndex)];
 
     if (!amount) {
       toast.error('Invalid bet', {
@@ -83,9 +84,10 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
       return;
     }
 
-    if (bigAmount > BigInt(state.liquidity)) {
+    const profit = (bigAmount * multiplier) / BigInt(1e6);
+    if (profit > BigInt(state.liquidity)) {
       toast.error('Bet too large', {
-        description: `Your bet amount is larger than the current liquidity of the game.`,
+        description: `Your bet amount is larger than the current liquidity.`,
       });
       return;
     }
@@ -96,7 +98,7 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
         data: encodeFunctionData({
           abi,
           functionName: 'placeBet',
-          args: [bigAmount, BigInt(multiplier)],
+          args: [bigAmount, BigInt(cashoutIndex)],
         }),
       },
     ];
