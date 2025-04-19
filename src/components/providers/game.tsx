@@ -41,11 +41,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } else if (game.data?.end) {
       setLastEnd(game.data.end + 1);
     }
-  }, [game.data]);
-
-  const oldState = previous.data && game.data && !game.data?.start;
+  }, [game.data?.start, game.data?.end]);
 
   const value: GameData = useMemo(() => {
+    const oldState = previous.data && game.data && !game.data?.start;
     return {
       state: oldState
         ? {
@@ -56,7 +55,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         : game.data,
       oldState: oldState,
     };
-  }, [game.data, previous.data, oldState]);
+  }, [game.data, previous.data]);
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
 };

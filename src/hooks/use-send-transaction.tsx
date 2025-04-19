@@ -134,7 +134,8 @@ export function useSendTransaction(options: Options) {
       });
       transaction.reset();
     }
-  }, [receipt.isSuccess, receipt.isError, options, transaction]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [receipt.isSuccess, receipt.isError, options.key]);
 
   return {
     sendTransaction: transaction.mutate,
