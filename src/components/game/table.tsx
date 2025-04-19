@@ -71,45 +71,50 @@ export const GameTable: React.FC<GameTableProps> = ({ className }) => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {state?.bets.map((bet, i) => {
-                const crashed = !stillAlive(bet, state);
-                const bigAmount = BigInt(bet.amount);
-                const multiplier = multipliers[bet.cashoutIndex];
-                const profit = formatUnits((bigAmount * multiplier) / BigInt(1e6) - bigAmount, 18);
-                return (
-                  <TableRow
-                    key={i}
-                    className={cn(
-                      'text-xs',
-                      number && state.start && number > state.start && crashed && 'bg-red-500/20',
-                      number &&
-                        state.start &&
-                        number > state.start &&
-                        !crashed &&
-                        'bg-green-500/20',
-                      bet.cancelled && 'bg-muted text-muted-foreground line-through opacity-50'
-                    )}
-                  >
-                    <TableCell>{shorthandHex(bet.user)}</TableCell>
-                    <TableCell>{formatUnits(bigAmount, 18)}</TableCell>
-                    <TableCell>
-                      <MultiplierBadge
-                        multiplier={multiplier}
-                        variant={bet.cancelled ? 'outline' : undefined}
-                      />
-                    </TableCell>
-
-                    <TableCell
+              {state?.bets
+                .filter(bet => !bet.cancelled)
+                .map((bet, i) => {
+                  const crashed = !stillAlive(bet, state);
+                  const bigAmount = BigInt(bet.amount);
+                  const multiplier = multipliers[bet.cashoutIndex];
+                  const profit = formatUnits(
+                    (bigAmount * multiplier) / BigInt(1e6) - bigAmount,
+                    18
+                  );
+                  return (
+                    <TableRow
+                      key={i}
                       className={cn(
-                        crashed ? 'text-red-500' : 'text-green-500',
-                        bet.cancelled && 'text-muted-foreground line-through'
+                        'text-xs',
+                        number && state.start && number > state.start && crashed && 'bg-red-500/20',
+                        number &&
+                          state.start &&
+                          number > state.start &&
+                          !crashed &&
+                          'bg-green-500/20',
+                        bet.cancelled && 'bg-muted text-muted-foreground line-through opacity-50'
                       )}
                     >
-                      {profit}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+                      <TableCell>{shorthandHex(bet.user)}</TableCell>
+                      <TableCell>{formatUnits(bigAmount, 18)}</TableCell>
+                      <TableCell>
+                        <MultiplierBadge
+                          multiplier={multiplier}
+                          variant={bet.cancelled ? 'outline' : undefined}
+                        />
+                      </TableCell>
+
+                      <TableCell
+                        className={cn(
+                          crashed ? 'text-red-500' : 'text-green-500',
+                          bet.cancelled && 'text-muted-foreground line-through'
+                        )}
+                      >
+                        {profit}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               {state?.bets.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={4} className="text-muted-foreground text-center">
