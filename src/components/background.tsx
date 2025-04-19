@@ -62,7 +62,7 @@ const MatrixRainBackground: React.FC = () => {
       state.start &&
       !state.end &&
       state.start <= number &&
-      state.start + multipliers.length - 1 > number
+      state.start + multipliers.length >= number
     ) {
       renderState.current.mode = 'running';
     }

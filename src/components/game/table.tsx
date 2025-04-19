@@ -120,14 +120,17 @@ export const GameTable: React.FC<GameTableProps> = ({ className }) => {
             </TableBody>
           </Table>
         </div>
-        <Image
-          src="https://grind.bearish.af/vibinghamster.gif"
-          width={540}
-          height={540}
-          alt="vibinghamster"
-          className="mt-auto size-40"
-          unoptimized
-        />
+
+        <div className="mt-auto">
+          <Image
+            src="https://grind.bearish.af/vibinghamster.gif"
+            width={540}
+            height={540}
+            alt="vibinghamster"
+            className="-mt-40 size-40"
+            unoptimized
+          />
+        </div>
       </div>
     </div>
   );

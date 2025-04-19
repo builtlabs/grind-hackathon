@@ -350,14 +350,16 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
           </p>
         )}
 
-        <Image
-          src="https://grind.bearish.af/GrindMath01.gif"
-          alt="Grind Math"
-          width={540}
-          height={540}
-          unoptimized
-          className="mt-auto size-32"
-        />
+        <div className="mt-auto">
+          <Image
+            src="https://grind.bearish.af/GrindMath01.gif"
+            alt="Grind Math"
+            width={540}
+            height={540}
+            unoptimized
+            className="-mt-32 size-32"
+          />
+        </div>
       </div>
     </div>
   );
