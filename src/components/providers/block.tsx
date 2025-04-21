@@ -3,7 +3,6 @@
 import { env } from '@/env.mjs';
 import { Alchemy, Network } from 'alchemy-sdk';
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { useDebounce } from '@uidotdev/usehooks';
 
 const alchemy = new Alchemy({
   apiKey: env.NEXT_PUBLIC_ALCHEMY_API_KEY,
@@ -18,7 +17,6 @@ const BlockContext = createContext<BlockData | null>(null);
 
 export const BlockProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [block, setBlock] = useState<number>();
-  const debounced = useDebounce(block, 10);
 
   useEffect(() => {
     function handleBlock(block: number) {
@@ -39,7 +37,7 @@ export const BlockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
   }, []);
 
-  const value: BlockData = useMemo(() => ({ number: debounced }), [debounced]);
+  const value: BlockData = useMemo(() => ({ number: block }), [block]);
 
   return <BlockContext.Provider value={value}>{children}</BlockContext.Provider>;
 };
