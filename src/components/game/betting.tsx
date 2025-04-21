@@ -168,11 +168,13 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
   useEffect(() => {
     if (!state || !number) return;
 
-    if (state.end === number - 1 || state.start + multipliers.length - 1 === number) {
+    if (state.end === number - 1) {
+      // Game Crashed
       setEnded(true);
-    }
-
-    if (ended && oldState) {
+    } else if (!state.end && state.start + multipliers.length - 1 === number) {
+      // Game reached 100x
+      setEnded(true);
+    } else if (ended && oldState) {
       // Game has been reset
       grind.refetch();
       setEnded(false);
