@@ -57,13 +57,13 @@ export const GameTable: React.FC<GameTableProps> = ({ className }) => {
 
       <div
         className={cn(
-          'bg-muted/20 scrollbar-hidden flex grow flex-col items-center overflow-y-auto rounded border p-4 pb-0 backdrop-blur-md'
+          'bg-muted/20 scrollbar-hidden flex min-h-64 grow flex-col items-center overflow-y-auto rounded border p-4 pb-0 backdrop-blur-md'
         )}
       >
         <div className="w-full">
           <Table className="border-separate border-spacing-y-2">
             <TableHeader>
-              <TableRow className="bg-transparent text-xs backdrop-blur-none *:data-[slot=table-head]:h-6">
+              <TableRow className="bg-transparent text-[10px] backdrop-blur-none *:data-[slot=table-head]:h-6 sm:text-xs">
                 <TableHead>User</TableHead>
                 <TableHead>Amount</TableHead>
                 <TableHead>Multiplier</TableHead>

@@ -69,6 +69,13 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
+    if (!client) {
+      toast.error('Not connected', {
+        description: `Please connect abstract before placing a bet.`,
+      });
+      return;
+    }
+
     if (!grind.data || !state) return;
 
     const formData = new FormData(e.currentTarget);
@@ -244,7 +251,7 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
       </div>
       <div
         className={cn(
-          'bg-muted/20 scrollbar-hidden flex h-min grow flex-col items-center gap-3 overflow-y-auto rounded border p-4 pb-0 backdrop-blur-md',
+          'bg-muted/20 scrollbar-hidden flex h-min min-h-64 grow flex-col items-center gap-3 overflow-y-auto rounded border p-4 pb-0 backdrop-blur-md',
           className
         )}
       >
@@ -253,7 +260,7 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
           <div className="w-full">
             <Table className="border-separate border-spacing-y-2">
               <TableHeader>
-                <TableRow className="bg-transparent text-xs backdrop-blur-none *:data-[slot=table-head]:h-6">
+                <TableRow className="bg-transparent text-[10px] backdrop-blur-none *:data-[slot=table-head]:h-6 sm:text-xs">
                   <TableHead>Amount</TableHead>
                   <TableHead>Multiplier</TableHead>
                   <TableHead>Profit</TableHead>

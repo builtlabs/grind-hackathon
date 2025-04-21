@@ -17,7 +17,7 @@ export const AuthButton: React.FC<{
   if (status !== 'connected') {
     return (
       <Button className={cn('md:w-44', className)} onClick={login} type="button">
-        Connect Abstract
+        Connect <span className="hidden min-[420px]:inline">Abstract</span>
       </Button>
     );
   }

@@ -8,7 +8,7 @@ export const Header: React.FC = () => {
       <div className="flex items-center gap-2">
         <Link
           href="/"
-          className="flex items-center gap-1 text-xl font-bold uppercase min-[320px]:text-2xl min-[400px]:text-3xl"
+          className="flex items-center gap-1 text-xl font-bold uppercase min-[320px]:text-2xl min-[410px]:text-3xl"
         >
           <Image
             src="/icon.png"

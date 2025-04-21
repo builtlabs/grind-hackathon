@@ -26,7 +26,7 @@ export default function Error({
   }
 
   return (
-    <main className="container flex w-full grow items-center justify-center">
+    <main className="container flex w-full grow items-center justify-center py-20 xl:py-32">
       <Card className="w-full max-w-3xl">
         <CardHeader>
           <CardTitle>Something went wrong!</CardTitle>

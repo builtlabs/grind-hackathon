@@ -24,7 +24,7 @@ const MatrixRainBackground: React.FC = () => {
   const renderState = useRef<RenderState>({
     width: 0,
     height: 0,
-    fontSize: 0,
+    fontSize: 16,
     columns: 0,
     drops: [] as number[],
     hexChars: '0123456789ABCDEF',
@@ -75,10 +75,9 @@ const MatrixRainBackground: React.FC = () => {
     if (!ctx) return;
 
     // Initialize canvas dimensions
-    renderState.current.width = canvas.width = window.innerWidth;
-    renderState.current.height = canvas.height = window.innerHeight;
+    renderState.current.width = canvas.width = canvas.clientWidth;
+    renderState.current.height = canvas.height = canvas.clientHeight;
 
-    renderState.current.fontSize = renderState.current.width < 640 ? 10 : 16;
     const columns = Math.floor(renderState.current.width / renderState.current.fontSize);
     renderState.current.drops = Array.from(
       { length: columns },
@@ -87,9 +86,8 @@ const MatrixRainBackground: React.FC = () => {
 
     // Handle window resizing
     const handleResize = () => {
-      renderState.current.width = canvas.width = window.innerWidth;
-      renderState.current.height = canvas.height = window.innerHeight;
-      renderState.current.fontSize = renderState.current.width < 640 ? 10 : 16;
+      renderState.current.width = canvas.width = canvas.clientWidth;
+      renderState.current.height = canvas.height = canvas.clientHeight;
       const newColumns = Math.floor(renderState.current.width / renderState.current.fontSize);
       renderState.current.drops = Array.from(
         { length: newColumns },
@@ -178,7 +176,7 @@ const MatrixRainBackground: React.FC = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="pointer-events-none absolute inset-0 -z-10 h-full"
+      className="pointer-events-none absolute inset-0 -z-10 h-full w-full"
       style={{
         WebkitMaskImage: 'radial-gradient(ellipse at center, #0000001A 50%, black)',
         maskImage: 'radial-gradient(ellipse at center, #0000001A 50%, black)',

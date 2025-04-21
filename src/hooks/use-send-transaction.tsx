@@ -3,7 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
 import { Account, Address, Chain, Hex, SendTransactionParameters } from 'viem';
-import { useTransactionReceipt } from 'wagmi';
+import { useAccount, useTransactionReceipt } from 'wagmi';
 import { abstractTestnet } from 'viem/chains';
 import { privateKeyToAccount } from 'viem/accounts';
 import { useSessionKey } from './use-session-key';
@@ -15,7 +15,8 @@ interface Options {
 }
 
 export function useSendTransaction(options: Options) {
-  const { data: client, isPending, error } = useAbstractClient();
+  const { isConnected } = useAccount();
+  const { data: client, error, refetch } = useAbstractClient();
   const { data: session, isPending: isPendingSession } = useSessionKey();
 
   const transaction = useMutation({
@@ -28,7 +29,7 @@ export function useSendTransaction(options: Options) {
         | SendTransactionParameters<Chain, Account>[];
       onSuccess?: () => void;
     }) => {
-      if (isPending) {
+      if (!isConnected) {
         toast.error('Connect Abstract', {
           id: options.key,
           description: 'You need to connect your Abstract wallet to send transactions.',
@@ -137,8 +138,14 @@ export function useSendTransaction(options: Options) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [receipt.isSuccess, receipt.isError, options.key]);
 
+  useEffect(() => {
+    if (!isConnected) {
+      refetch();
+    }
+  }, [isConnected, refetch]);
+
   return {
     sendTransaction: transaction.mutate,
-    isPending: transaction.isPending || receipt.isLoading || isPending || isPendingSession,
+    isPending: transaction.isPending || receipt.isLoading || !isConnected || isPendingSession,
   };
 }

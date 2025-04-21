@@ -4,7 +4,7 @@ import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/comp
 
 export default function NotFound() {
   return (
-    <main className="container flex w-full grow items-center justify-center">
+    <main className="container flex w-full grow items-center justify-center py-20 xl:py-32">
       <Card className="w-full max-w-3xl">
         <CardHeader>
           <CardTitle>Page not found!</CardTitle>

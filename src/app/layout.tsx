@@ -36,7 +36,7 @@ export default async function RootLayout({
           <BlockProvider>
             <Header />
             <GameProvider>
-              <div className="relative -mt-16 flex flex-col overflow-hidden xl:h-screen xl:min-h-[750px] xl:pt-16">
+              <div className="relative -mt-16 flex min-h-screen flex-col overflow-hidden xl:h-screen xl:min-h-[750px] xl:pt-16">
                 <MatrixRainBackground />
                 {children}
               </div>
