@@ -11,7 +11,7 @@ import { useAbstractClient } from '@abstract-foundation/agw-react';
 import { useBalance, useDisconnect, useEnsAvatar, useEnsName } from 'wagmi';
 import { BlurredAvatar } from './avatar';
 import { ClipboardCopy, Fuel, LifeBuoy, LogOut } from 'lucide-react';
-import { cn, shorthandHex } from '@/lib/utils';
+import { cn, formatNumber, shorthandHex } from '@/lib/utils';
 import { toast } from 'sonner';
 import { formatUnits } from 'viem';
 import Link from 'next/link';
@@ -30,7 +30,7 @@ export const Account: React.FC<{
     address: client?.account?.address,
     query: {
       select: data => ({
-        formatted: Number(formatUnits(data.value, data.decimals)).toFixed(4),
+        rounded: formatNumber(Number(formatUnits(data.value, data.decimals))),
         symbol: data.symbol,
       }),
     },
@@ -72,7 +72,7 @@ export const Account: React.FC<{
           >
             <Fuel />
             <span>
-              {balance.isSuccess ? `${balance.data?.formatted} ${balance.data?.symbol}` : ''}
+              {balance.isSuccess ? `${balance.data?.rounded} ${balance.data?.symbol}` : ''}
             </span>
           </Link>
         </DropdownMenuItem>

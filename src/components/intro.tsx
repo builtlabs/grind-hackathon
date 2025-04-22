@@ -329,7 +329,7 @@ export const IntroDialog: React.FC = () => {
                 GRIND from the contract.
                 <br />
                 <br />
-                <span>Balance: {grind.isSuccess ? grind.data?.formatted : '0.00'} GRIND</span>
+                <span>Balance: {grind.isSuccess ? grind.data?.rounded : '0.00'} GRIND</span>
                 <br />
                 <br />
               </p>
