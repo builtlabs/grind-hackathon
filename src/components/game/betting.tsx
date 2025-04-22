@@ -22,7 +22,7 @@ import { multipliers, stateCountdown, stillAlive } from '@/lib/block-crash';
 import { useGame } from '../providers/game';
 import { toast } from 'sonner';
 import { useBlock } from '../providers/block';
-import { cn } from '@/lib/utils';
+import { cn, formatNumber } from '@/lib/utils';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import { useAbstractClient } from '@abstract-foundation/agw-react';
@@ -293,7 +293,9 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
                 const crashed = !stillAlive(bet, state);
                 const bigAmount = BigInt(bet.amount);
                 const multiplier = multipliers[bet.cashoutIndex];
-                const profit = formatUnits((bigAmount * multiplier) / BigInt(1e6) - bigAmount, 18);
+                const profit = formatNumber(
+                  Number(formatUnits((bigAmount * multiplier) / BigInt(1e6) - bigAmount, 18))
+                );
 
                 return (
                   <div
@@ -317,7 +319,7 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
                       bet.cancelled && 'bg-muted text-muted-foreground line-through opacity-50'
                     )}
                   >
-                    <span className="grow">{formatUnits(bigAmount, 18)}</span>
+                    <span className="grow">{formatNumber(Number(formatUnits(bigAmount, 18)))}</span>
                     <span className="w-20 flex-none">
                       <MultiplierBadge
                         multiplier={multiplier}

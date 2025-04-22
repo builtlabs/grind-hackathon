@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { useGame } from '../providers/game';
 import { multipliers, stillAlive, stillGrinding } from '@/lib/block-crash';
-import { cn, shorthandHex } from '@/lib/utils';
+import { cn, formatNumber, shorthandHex } from '@/lib/utils';
 import { useBlock } from '../providers/block';
 import { formatUnits } from 'viem';
 import { MultiplierBadge } from './multiplier';
@@ -45,7 +45,14 @@ export const GameTable: React.FC<GameTableProps> = ({ className }) => {
           <div className="flex flex-col">
             <span className="text-muted-foreground text-xs">Grind Bet</span>
             <span className="text-sm font-medium">
-              {formatUnits(state?.bets.reduce((a, b) => a + BigInt(b.amount), BigInt(0)) ?? 0n, 18)}
+              {formatNumber(
+                Number(
+                  formatUnits(
+                    state?.bets.reduce((a, b) => a + BigInt(b.amount), BigInt(0)) ?? 0n,
+                    18
+                  )
+                )
+              )}
             </span>
           </div>
         </div>
@@ -83,7 +90,9 @@ export const GameTable: React.FC<GameTableProps> = ({ className }) => {
                 const crashed = !stillAlive(bet, state);
                 const bigAmount = BigInt(bet.amount);
                 const multiplier = multipliers[bet.cashoutIndex];
-                const profit = formatUnits((bigAmount * multiplier) / BigInt(1e6) - bigAmount, 18);
+                const profit = formatNumber(
+                  Number(formatUnits((bigAmount * multiplier) / BigInt(1e6) - bigAmount, 18))
+                );
 
                 return (
                   <div
@@ -108,7 +117,7 @@ export const GameTable: React.FC<GameTableProps> = ({ className }) => {
                     )}
                   >
                     <span className="w-24">{shorthandHex(bet.user)}</span>
-                    <span className="grow">{formatUnits(bigAmount, 18)}</span>
+                    <span className="grow">{formatNumber(Number(formatUnits(bigAmount, 18)))}</span>
                     <span className="w-20">
                       <MultiplierBadge
                         multiplier={multiplier}
