@@ -78,7 +78,7 @@ const MatrixRainBackground: React.FC = () => {
     renderState.current.width = canvas.width = canvas.clientWidth;
     renderState.current.height = canvas.height = canvas.clientHeight;
 
-    const columns = Math.floor(renderState.current.width / renderState.current.fontSize);
+    const columns = Math.ceil(renderState.current.width / renderState.current.fontSize);
     renderState.current.drops = Array.from(
       { length: columns },
       () => (Math.random() * renderState.current.height) / renderState.current.fontSize
@@ -88,7 +88,7 @@ const MatrixRainBackground: React.FC = () => {
     const handleResize = () => {
       renderState.current.width = canvas.width = canvas.clientWidth;
       renderState.current.height = canvas.height = canvas.clientHeight;
-      const newColumns = Math.floor(renderState.current.width / renderState.current.fontSize);
+      const newColumns = Math.ceil(renderState.current.width / renderState.current.fontSize);
       renderState.current.drops = Array.from(
         { length: newColumns },
         () => (Math.random() * renderState.current.height) / renderState.current.fontSize
