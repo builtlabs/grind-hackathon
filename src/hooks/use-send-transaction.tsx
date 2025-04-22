@@ -2,7 +2,7 @@ import { useAbstractClient } from '@abstract-foundation/agw-react';
 import { useMutation } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
-import { Account, Address, Chain, Hex, SendTransactionParameters } from 'viem';
+import { Account, Address, BaseError, Chain, Hex, SendTransactionParameters } from 'viem';
 import { useAccount, useTransactionReceipt } from 'wagmi';
 import { abstractTestnet } from 'viem/chains';
 import { privateKeyToAccount } from 'viem/accounts';
@@ -103,12 +103,34 @@ export function useSendTransaction(options: Options) {
       });
     },
     onError(error) {
-      console.error('Transaction error:', error);
-      toast.error('Sending Transaction Failed', {
-        id: options.key,
-        description: 'There was an error sending the transaction.',
-        duration: 2000,
-      });
+      console.error('Transaction error:', JSON.stringify(error, null, 2));
+      if (error instanceof Error && error instanceof BaseError) {
+        if (error.details === 'Failed to initialize request') {
+          toast.error('Sending Transaction Failed', {
+            id: options.key,
+            description: 'Pop-up Blocked, please allow pop-ups for this site.',
+            duration: 10000,
+          });
+        } else {
+          toast.error('Sending Transaction Failed', {
+            id: options.key,
+            description: error.shortMessage,
+            duration: 2000,
+          });
+        }
+      } else if (error instanceof Error) {
+        toast.error('Sending Transaction Failed', {
+          id: options.key,
+          description: error.message,
+          duration: 2000,
+        });
+      } else {
+        toast.error('Sending Transaction Failed', {
+          id: options.key,
+          description: 'There was an error sending the transaction.',
+          duration: 2000,
+        });
+      }
     },
   });
 
