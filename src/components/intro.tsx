@@ -25,6 +25,57 @@ import { useTurboMode } from '@/hooks/use-turbo-mode';
 import Image from 'next/image';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 
+type Device = 'ios-mobile' | 'ios-tablet' | 'android' | 'desktop' | 'chrome' | 'firefox' | 'edge';
+
+function getInstruction(type?: Device) {
+  switch (type) {
+    case 'ios-mobile':
+      return 'Tap the share button and select "Add to Home Screen".';
+    case 'ios-tablet':
+      return 'Tap the share button and select "Add to Home Screen".';
+    case 'android':
+      return 'Tap the three dots in the top right corner and select "Add to Home Screen".';
+    case 'chrome':
+      return 'Click the three dots in the top right corner and select "Save and share" then "Install page as app...".';
+    case 'firefox':
+      return 'Click the three lines in the top right corner and select "Install".';
+    case 'edge':
+      return 'Click the three dots in the top right corner and select "Apps" then "Install HashCrash".';
+    default:
+      return 'Use your browser settings to install this app.';
+  }
+}
+
+function useDevice() {
+  const [type, setType] = useState<Device>();
+
+  useEffect(() => {
+    const userAgent = navigator.userAgent;
+    const isIOSMobile = /iPhone|iPad|iPod/i.test(userAgent);
+    const isAndroid = /Android/i.test(userAgent);
+    const isTablet = /iPad/i.test(userAgent);
+    const isChrome = /Chrome/i.test(userAgent) && !/Edge|OPR/.test(userAgent);
+    const isFirefox = /Firefox/i.test(userAgent);
+    const isEdge = /Edg/i.test(userAgent);
+
+    if (isIOSMobile) {
+      setType(isTablet ? 'ios-tablet' : 'ios-mobile');
+    } else if (isAndroid) {
+      setType('android');
+    } else if (isEdge) {
+      setType('edge');
+    } else if (isChrome) {
+      setType('chrome');
+    } else if (isFirefox) {
+      setType('firefox');
+    } else {
+      setType('desktop');
+    }
+  }, []);
+
+  return type;
+}
+
 export const IntroDialog: React.FC = () => {
   const {
     value: seenIntro,
@@ -34,9 +85,11 @@ export const IntroDialog: React.FC = () => {
   const { data: client } = useAbstractClient();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
+  const type = useDevice();
+  const [supportsPWA, setSupportsPWA] = useState(false);
 
   const grind = useGrindBalance({
-    enabled: !!client?.account?.address && step === 2,
+    enabled: !!client?.account?.address && step === 3,
   });
 
   const { sendTransaction, isPending } = useSendTransaction({
@@ -51,8 +104,8 @@ export const IntroDialog: React.FC = () => {
   } = useTurboMode({
     enabled: true,
     onEnabled() {
-      if (step === 1) {
-        setStep(2);
+      if (step === 2) {
+        setStep(3);
       }
     },
   });
@@ -90,11 +143,40 @@ export const IntroDialog: React.FC = () => {
   }, [seenIntro, seenIntroIsPending, setSeenIntro]);
 
   useEffect(() => {
-    if (client && step === 0) {
-      setStep(1);
+    if (client && step === 1) {
+      setStep(2);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [client]);
+
+  useEffect(() => {
+    const isStandalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      ('standalone' in window.navigator && window.navigator.standalone);
+
+    const userAgent = navigator.userAgent;
+    const isIOS = /iPhone|iPad|iPod/i.test(userAgent);
+    const isAndroid = /Android/i.test(userAgent);
+    const isChrome = /Chrome/i.test(userAgent) && !/Edge|OPR/.test(userAgent);
+    const isFirefox = /Firefox/i.test(userAgent);
+    const isEdge = /Edg/i.test(userAgent);
+
+    const isSupportedBrowser = isChrome || isFirefox || isEdge || isIOS || isAndroid;
+
+    if (isStandalone) {
+      setSupportsPWA(false);
+      if (step === 0) {
+        setStep(1);
+      }
+    } else if (isSupportedBrowser) {
+      setSupportsPWA(true);
+    } else {
+      setSupportsPWA(false);
+      if (step === 0) {
+        setStep(1);
+      }
+    }
+  }, [step]);
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
@@ -123,29 +205,39 @@ export const IntroDialog: React.FC = () => {
         </AlertDialogHeader>
 
         <div className="flex w-full items-center gap-2">
+          {supportsPWA && (
+            <Stage
+              current={step}
+              number={0}
+              label="Install"
+              onClick={() => {
+                setStep(0);
+              }}
+            />
+          )}
           <Stage
             current={step}
-            number={0}
+            number={1}
             label="Account"
             onClick={() => {
-              setStep(0);
+              setStep(1);
             }}
           />
           <Stage
             current={step}
-            number={1}
+            number={2}
             label="Turbo"
             onClick={() => {
-              setStep(1);
+              setStep(2);
             }}
             disabled={!client}
           />
           <Stage
             current={step}
-            number={2}
+            number={3}
             label="Betting"
             onClick={() => {
-              setStep(2);
+              setStep(3);
             }}
             disabled={!client}
           />
@@ -158,6 +250,24 @@ export const IntroDialog: React.FC = () => {
               translate: `calc(${-step * 100}cqw + ${-step * 2.5}rem)`,
             }}
           >
+            {/* STEP 0 */}
+            <div className="flex w-[100cqw] flex-none flex-col">
+              <h2 className="text-lg font-bold">Install App</h2>
+              <p className="text-xs">
+                HashCrash can be installed as a Progressive Web App (PWA) on your device. This
+                allows you to play HashCrash without having to open your browser.
+                <br />
+                <br />
+                {type && getInstruction(type)}
+              </p>
+
+              <AlertDialogFooter className="mt-auto">
+                <Button variant="outline" onClick={() => setStep(1)}>
+                  Skip Install
+                </Button>
+              </AlertDialogFooter>
+            </div>
+
             {/* STEP 1 */}
             <div className="flex w-[100cqw] flex-none flex-col">
               <h2 className="text-lg font-bold">Abstract Global Wallet</h2>
