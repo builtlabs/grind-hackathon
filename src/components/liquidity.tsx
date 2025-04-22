@@ -238,7 +238,7 @@ export const ManageLiquidity: React.FC = () => {
       });
     }
 
-    sendTransaction({ transaction, onSuccess: refetch });
+    sendTransaction({ transaction, onSuccess: refetch, useSession: false });
   }
 
   function handleWithdraw(event: React.FormEvent<HTMLFormElement>) {
@@ -282,7 +282,7 @@ export const ManageLiquidity: React.FC = () => {
       },
     ];
 
-    sendTransaction({ transaction, onSuccess: refetch });
+    sendTransaction({ transaction, onSuccess: refetch, useSession: false });
   }
 
   function handleBalanceClicked(event: React.MouseEvent<HTMLButtonElement>) {

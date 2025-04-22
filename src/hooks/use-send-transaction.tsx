@@ -23,11 +23,13 @@ export function useSendTransaction(options: Options) {
     mutationKey: [options.key],
     mutationFn: async ({
       transaction,
+      useSession = true,
     }: {
       transaction:
         | SendTransactionParameters<Chain, Account>
         | SendTransactionParameters<Chain, Account>[];
       onSuccess?: () => void;
+      useSession?: boolean;
     }) => {
       if (!isConnected) {
         toast.error('Connect Abstract', {
@@ -47,7 +49,7 @@ export function useSendTransaction(options: Options) {
         return;
       }
 
-      if (!session) {
+      if (!session || !useSession) {
         // Send without session
         return client.sendTransactionBatch({
           calls: Array.isArray(transaction) ? transaction : [transaction],
@@ -94,12 +96,13 @@ export function useSendTransaction(options: Options) {
         }
       }
     },
-    async onMutate() {
+    async onMutate({ useSession = true }) {
       toast.loading('Sending Transaction', {
         id: options.key,
-        description: session
-          ? 'Sending transaction with turbo mode!'
-          : 'Approve the transaction in your Abstract wallet.',
+        description:
+          session && useSession
+            ? 'Sending transaction with turbo mode!'
+            : 'Approve the transaction in your Abstract wallet.',
       });
     },
     onError(error) {
