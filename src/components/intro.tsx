@@ -209,6 +209,7 @@ export const IntroDialog: React.FC = () => {
             <Stage
               current={step}
               number={0}
+              index={0}
               label="Install"
               onClick={() => {
                 setStep(0);
@@ -218,6 +219,7 @@ export const IntroDialog: React.FC = () => {
           <Stage
             current={step}
             number={1}
+            index={supportsPWA ? 1 : 0}
             label="Account"
             onClick={() => {
               setStep(1);
@@ -226,6 +228,7 @@ export const IntroDialog: React.FC = () => {
           <Stage
             current={step}
             number={2}
+            index={supportsPWA ? 2 : 1}
             label="Turbo"
             onClick={() => {
               setStep(2);
@@ -235,6 +238,7 @@ export const IntroDialog: React.FC = () => {
           <Stage
             current={step}
             number={3}
+            index={supportsPWA ? 3 : 2}
             label="Betting"
             onClick={() => {
               setStep(3);
@@ -302,7 +306,7 @@ export const IntroDialog: React.FC = () => {
               </p>
 
               <AlertDialogFooter className="mt-auto">
-                <Button variant="outline" onClick={() => setStep(2)}>
+                <Button variant="outline" onClick={() => setStep(3)}>
                   Skip Turbo Mode
                 </Button>
                 <Button onClick={handleTurboMode} disabled={sessionKeyIsPending}>
@@ -346,10 +350,11 @@ export const IntroDialog: React.FC = () => {
 const Stage: React.FC<{
   current: number;
   number: number;
+  index: number;
   label: string;
   onClick: () => void;
   disabled?: boolean;
-}> = ({ current, number, label, onClick, disabled }) => {
+}> = ({ current, number, index, label, onClick, disabled }) => {
   return (
     <>
       <button
@@ -362,7 +367,7 @@ const Stage: React.FC<{
         disabled={disabled}
       >
         <div className="flex size-6 flex-none items-center justify-center rounded-full bg-current p-1 text-xs font-bold">
-          <span className="text-foreground">{number + 1}</span>
+          <span className="text-foreground">{index + 1}</span>
         </div>
         <span className="hidden text-xs text-current sm:inline-block">{label}</span>
       </button>
