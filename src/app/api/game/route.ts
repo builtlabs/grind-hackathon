@@ -32,6 +32,8 @@ const getState = cache(
       blockNumber: BigInt(blockNumber),
     });
 
+    // This cache method can handle 2MB of data, about 18000 bets
+    // If we need more, we can use a different cache method like redis
     return {
       current: blockNumber,
       start: Number(start),
