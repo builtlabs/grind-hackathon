@@ -59,6 +59,7 @@ export const Account: React.FC<{
               <BlurredAvatar address={client?.account.address} size={32} />
             </AvatarFallback>
           ) : null}
+          <AvatarFallback />
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end">
