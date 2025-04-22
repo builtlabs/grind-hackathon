@@ -1,14 +1,12 @@
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
-import { Address, getAbiItem, Hex, parseEther, toFunctionSelector } from 'viem';
-import { LimitType, SessionConfig } from '@abstract-foundation/agw-client/sessions';
+import { Address, Hex } from 'viem';
+import { SessionConfig } from '@abstract-foundation/agw-client/sessions';
 import { LOCAL_STORAGE_KEY_PREFIX } from './constants';
 import { getEncryptionKey } from './get-encryption-key';
 import { encrypt } from './encrypt-session';
-import { abi as blockCrashAbi, addresses as blockCrashAddresses } from '@/contracts/block-crash';
-import { abi as grindAbi, addresses as grindAddresses } from '@/contracts/grind';
-import { abstractTestnet } from 'viem/chains';
 import { getGeneralPaymasterInput } from 'viem/zksync';
 import { PAYMASTER_ADDRESS } from '../paymaster';
+import { getSessionConfig } from './session-config';
 
 /**
  * @function createAndStoreSession
@@ -54,90 +52,11 @@ export const createAndStoreSession = async (
     const sessionPrivateKey = generatePrivateKey();
     const sessionSigner = privateKeyToAccount(sessionPrivateKey);
 
+    const sessionConfig = getSessionConfig(sessionSigner.address);
     const { session } = await createSessionAsync({
       paymaster: PAYMASTER_ADDRESS,
       paymasterInput: getGeneralPaymasterInput({ innerInput: '0x' }),
-      session: {
-        signer: sessionSigner.address,
-        expiresAt: BigInt(Math.floor(Date.now() / 1000) + 60 * 60 * 24),
-        feeLimit: {
-          limitType: LimitType.Lifetime,
-          limit: parseEther('1'),
-          period: BigInt(0),
-        },
-        callPolicies: [
-          // {
-          //   target: grindAddresses[abstractTestnet.id],
-          //   selector: toFunctionSelector(getAbiItem({ abi: grindAbi, name: 'approve' })),
-          //   valueLimit: {
-          //     limitType: LimitType.Unlimited,
-          //     limit: BigInt(0),
-          //     period: BigInt(0),
-          //   },
-          //   maxValuePerUse: BigInt(0),
-          //   constraints: [
-          //     {
-          //       condition: ConstraintCondition.Equal,
-          //       index: 0n,
-          //       refValue: encodeAbiParameters(
-          //         [{ type: 'address' }],
-          //         [blockCrashAddresses[abstractTestnet.id]]
-          //       ),
-          //       limit: {
-          //         limitType: LimitType.Unlimited,
-          //         limit: BigInt(0),
-          //         period: BigInt(0),
-          //       },
-          //     },
-          //   ],
-          // },
-          {
-            target: blockCrashAddresses[abstractTestnet.id],
-            selector: toFunctionSelector(getAbiItem({ abi: blockCrashAbi, name: 'placeBet' })),
-            valueLimit: {
-              limitType: LimitType.Unlimited,
-              limit: BigInt(0),
-              period: BigInt(0),
-            },
-            maxValuePerUse: BigInt(0),
-            constraints: [],
-          },
-          {
-            target: blockCrashAddresses[abstractTestnet.id],
-            selector: toFunctionSelector(getAbiItem({ abi: blockCrashAbi, name: 'cancelBet' })),
-            valueLimit: {
-              limitType: LimitType.Unlimited,
-              limit: BigInt(0),
-              period: BigInt(0),
-            },
-            maxValuePerUse: BigInt(0),
-            constraints: [],
-          },
-          {
-            target: blockCrashAddresses[abstractTestnet.id],
-            selector: toFunctionSelector(getAbiItem({ abi: blockCrashAbi, name: 'cashEarly' })),
-            valueLimit: {
-              limitType: LimitType.Unlimited,
-              limit: BigInt(0),
-              period: BigInt(0),
-            },
-            maxValuePerUse: BigInt(0),
-            constraints: [],
-          },
-          {
-            target: grindAddresses[abstractTestnet.id],
-            selector: toFunctionSelector(getAbiItem({ abi: grindAbi, name: 'mint' })),
-            valueLimit: {
-              limitType: LimitType.Unlimited,
-              limit: BigInt(0),
-              period: BigInt(0),
-            },
-            maxValuePerUse: BigInt(0),
-            constraints: [],
-          },
-        ],
-        transferPolicies: [],
-      },
+      session: sessionConfig,
     });
 
     const sessionData = { session, privateKey: sessionPrivateKey };

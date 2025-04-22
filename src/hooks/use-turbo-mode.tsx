@@ -1,35 +1,112 @@
-import { clearStoredSession } from '@/lib/session-keys/clear-stored-session';
-import { createAndStoreSession } from '@/lib/session-keys/create-and-store-session';
-import { useAbstractClient, useCreateSession } from '@abstract-foundation/agw-react';
+import { abi as abstractGlobalWalletAbi } from '@/contracts/abstract-global-wallet';
+import { abi as sessionKeyValidatorAbi, addresses } from '@/contracts/session-key-validator';
+import { abi as grindAbi, addresses as grindAddresses } from '@/contracts/grind';
+import { encodeSession } from '@abstract-foundation/agw-client/sessions';
+import { useAbstractClient } from '@abstract-foundation/agw-react';
+import {
+  Account,
+  Chain,
+  concatHex,
+  encodeFunctionData,
+  maxUint256,
+  SendTransactionParameters,
+} from 'viem';
+import { abstractTestnet } from 'viem/chains';
+import { useAccount, usePublicClient } from 'wagmi';
+import { useSendTransaction } from './use-send-transaction';
+import { useGrindBalance } from './use-grind-balance';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { abstractTestnet } from 'viem/chains';
-import { useAccount } from 'wagmi';
-import { useGrindBalance } from './use-grind-balance';
-import { useSendTransaction } from './use-send-transaction';
-import { encodeFunctionData, maxUint256 } from 'viem';
-import { abi as grindAbi, addresses as grindAddresses } from '@/contracts/grind';
-import { addresses } from '@/contracts/block-crash';
-import { useSessionKey } from './use-session-key';
+import { clearStoredSession } from '@/lib/session-keys/clear-stored-session';
 import { useEffect } from 'react';
+import { useSessionKey } from './use-session-key';
+import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
+import { getSessionConfig } from '@/lib/session-keys/session-config';
+import { storeSession } from '@/lib/session-keys/store-session';
 
 export function useTurboMode(options?: { enabled?: boolean; onEnabled?: () => void }) {
   const { address } = useAccount();
-  const { createSessionAsync } = useCreateSession();
-  const { data: client } = useAbstractClient();
-  const grind = useGrindBalance();
-
   const queryClient = useQueryClient();
+  const publicClient = usePublicClient();
+  const { data: client } = useAbstractClient();
+  const { sendTransaction } = useSendTransaction({
+    key: 'turbo-mode',
+  });
+  const grind = useGrindBalance();
   const { data: session, isPending } = useSessionKey(options);
 
   const createSession = useMutation({
     mutationKey: ['create-session'],
-    mutationFn: () => {
+    mutationFn: async () => {
       if (!client || !address) {
         throw new Error('Client or address not available');
       }
 
-      return createAndStoreSession(address, createSessionAsync);
+      if (!publicClient) {
+        throw new Error('Public client not available');
+      }
+
+      const sessionPrivateKey = generatePrivateKey();
+      const sessionSigner = privateKeyToAccount(sessionPrivateKey);
+
+      const session = getSessionConfig(sessionSigner.address);
+
+      const validationHooks = await publicClient.readContract({
+        address,
+        abi: abstractGlobalWalletAbi,
+        functionName: 'listHooks',
+        args: [true],
+      });
+
+      const hasSessionModule = validationHooks.some(hook => hook === addresses[abstractTestnet.id]);
+
+      const transaction: SendTransactionParameters<Chain, Account>[] = [];
+
+      if (!hasSessionModule) {
+        const encodedSession = encodeSession(session);
+        transaction.push({
+          to: address,
+          data: encodeFunctionData({
+            abi: abstractGlobalWalletAbi,
+            functionName: 'addModule',
+            args: [concatHex([addresses[abstractTestnet.id], encodedSession])],
+          }),
+        });
+      } else {
+        transaction.push({
+          to: addresses[abstractTestnet.id],
+          data: encodeFunctionData({
+            abi: sessionKeyValidatorAbi,
+            functionName: 'createSession',
+            args: [session as never],
+          }),
+        });
+      }
+
+      if (grind.data?.allowance !== maxUint256) {
+        transaction.push({
+          to: grindAddresses[abstractTestnet.id],
+          data: encodeFunctionData({
+            abi: grindAbi,
+            functionName: 'approve',
+            args: [addresses[abstractTestnet.id], maxUint256],
+          }),
+        });
+      }
+
+      const sessionData = { session, privateKey: sessionPrivateKey };
+
+      sendTransaction({
+        transaction,
+        onSuccess: () => {
+          grind.refetch();
+          storeSession(address, sessionData);
+          queryClient.setQueryData(['session'], () => sessionData);
+          options?.onEnabled?.();
+        },
+      });
+
+      return sessionData;
     },
     onMutate: () => {
       toast.loading('Enabling turbo mode...', {
@@ -42,14 +119,6 @@ export function useTurboMode(options?: { enabled?: boolean; onEnabled?: () => vo
         id: 'turbo-mode',
         description: 'There was an error enabling turbo mode.',
       });
-    },
-    onSuccess: session => {
-      toast.success('Turbo mode enabled', {
-        id: 'turbo-mode',
-        description: 'Turbo mode is now enabled.',
-      });
-      queryClient.setQueryData(['session'], () => session);
-      options?.onEnabled?.();
     },
   });
 
@@ -83,29 +152,8 @@ export function useTurboMode(options?: { enabled?: boolean; onEnabled?: () => vo
     },
   });
 
-  const { sendTransaction } = useSendTransaction({
-    key: 'approve-grind',
-  });
-
   function handleCreateSession() {
-    if (grind.data?.allowance === maxUint256) {
-      createSession.mutate();
-    } else {
-      sendTransaction({
-        transaction: {
-          to: grindAddresses[abstractTestnet.id],
-          data: encodeFunctionData({
-            abi: grindAbi,
-            functionName: 'approve',
-            args: [addresses[abstractTestnet.id], maxUint256],
-          }),
-        },
-        onSuccess: () => {
-          grind.refetch();
-          createSession.mutate();
-        },
-      });
-    }
+    createSession.mutate();
   }
 
   function handleClearSession() {
