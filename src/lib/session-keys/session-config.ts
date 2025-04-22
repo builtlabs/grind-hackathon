@@ -73,6 +73,19 @@ export function getSessionConfig(signer: Address): SessionConfig {
         constraints: [],
       },
       {
+        target: blockCrashAddresses[abstractTestnet.id],
+        selector: toFunctionSelector(
+          getAbiItem({ abi: blockCrashAbi, name: 'queueLiquidityChange' })
+        ),
+        valueLimit: {
+          limitType: LimitType.Unlimited,
+          limit: BigInt(0),
+          period: BigInt(0),
+        },
+        maxValuePerUse: BigInt(0),
+        constraints: [],
+      },
+      {
         target: grindAddresses[abstractTestnet.id],
         selector: toFunctionSelector(getAbiItem({ abi: grindAbi, name: 'mint' })),
         valueLimit: {

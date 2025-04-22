@@ -31,6 +31,7 @@ import { Turbo } from '../turbo';
 import { ContractState } from '@/app/api/game/types';
 import { MultiplierInput } from '../input/multiplier';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import { ManageLiquidity } from '../liquidity';
 interface BettingProps {
   className?: string;
 }
@@ -251,9 +252,12 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
             >
               Place Bet
             </Button>
-            <Turbo />
           </div>
         </form>
+        <div className="mt-1 flex items-center justify-between">
+          <ManageLiquidity />
+          <Turbo />
+        </div>
       </div>
       <div
         ref={parentRef}

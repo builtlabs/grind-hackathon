@@ -22,12 +22,14 @@ export const Turbo: React.FC = () => {
           <Button
             variant="link"
             type="button"
-            className="text-muted-foreground mt-1 ml-auto h-min text-xs"
+            className="text-muted-foreground h-min text-xs"
             size="sm"
             onClick={handleTurboMode}
           >
             <Zap className={cn(session && 'fill-current')} />
-            {session ? 'disable turbo mode' : 'enable turbo mode'}
+            <span>
+              {session ? 'Disable' : 'Enable'} Turbo <span className="hidden sm:inline">Mode</span>
+            </span>
           </Button>
         </TooltipTrigger>
         <TooltipContent className="w-64" side="bottom">
