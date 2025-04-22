@@ -23,26 +23,20 @@ import { useGame } from '../providers/game';
 import { toast } from 'sonner';
 import { useBlock } from '../providers/block';
 import { cn } from '@/lib/utils';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import { useAbstractClient } from '@abstract-foundation/agw-react';
 import { MultiplierBadge } from './multiplier';
 import { Turbo } from '../turbo';
 import { ContractState } from '@/app/api/game/types';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { MultiplierInput } from '../input/multiplier';
+import { useVirtualizer } from '@tanstack/react-virtual';
 interface BettingProps {
   className?: string;
 }
 
 export const Betting: React.FC<BettingProps> = ({ className }) => {
+  const parentRef = useRef(null);
   const { number } = useBlock();
   const { state, oldState } = useGame();
   const countdown = useMemo(
@@ -64,6 +58,16 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
   const grind = useGrindBalance();
   const { sendTransaction, isPending } = useSendTransaction({
     key: 'bets',
+  });
+
+  const virtualizer = useVirtualizer({
+    count: myBets.length ?? 0,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 56,
+    gap: 8,
+    paddingStart: 52,
+    paddingEnd: 16,
+    overscan: 5,
   });
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -252,121 +256,118 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
         </form>
       </div>
       <div
+        ref={parentRef}
         className={cn(
-          'bg-muted/20 scrollbar-hidden flex h-min min-h-64 grow flex-col items-center gap-3 overflow-y-auto rounded border p-4 pb-0 backdrop-blur-md',
-          className
+          'bg-muted/20 scrollbar-hidden flex min-h-64 grow flex-col items-center overflow-y-auto rounded border p-4 pb-0 backdrop-blur-md'
         )}
       >
-        <h2 className="text-xl font-bold">{oldState ? `Previous Round` : 'Your Bets'}</h2>
-        {state && myBets.length > 0 && (
-          <div className="w-full">
-            <Table className="border-separate border-spacing-y-2">
-              <TableHeader>
-                <TableRow className="bg-transparent text-[10px] backdrop-blur-none *:data-[slot=table-head]:h-6 sm:text-xs">
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Multiplier</TableHead>
-                  <TableHead>Profit</TableHead>
-                  <TableHead>
-                    <span className="sr-only">Actions</span>
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {myBets.map(bet => {
-                  const crashed = !stillAlive(bet, state);
-                  const bigAmount = BigInt(bet.amount);
-                  const multiplier = multipliers[bet.cashoutIndex];
-                  const profit = formatUnits(
-                    (bigAmount * multiplier) / BigInt(1e6) - bigAmount,
-                    18
-                  );
-                  return (
-                    <TableRow
-                      key={bet.index}
+        <div
+          className="relative isolate w-full flex-none grow overflow-visible"
+          style={{ height: `${virtualizer.getTotalSize()}px` }}
+        >
+          <h2 className="text-center text-xl font-bold">
+            {oldState ? `Previous Round` : 'Your Bets'}
+          </h2>
+          <div className="mb-2 flex w-full items-center gap-5 px-2 text-xs">
+            <span className="grow">Amount</span>
+            <span className="w-20">Multiplier</span>
+            <span className="grow">Profit</span>
+            <span className="w-16">
+              <span className="sr-only">Actions</span>
+            </span>
+          </div>
+          {state
+            ? virtualizer.getVirtualItems().map(virtualRow => {
+                const bet = myBets[virtualRow.index];
+                const crashed = !stillAlive(bet, state);
+                const bigAmount = BigInt(bet.amount);
+                const multiplier = multipliers[bet.cashoutIndex];
+                const profit = formatUnits((bigAmount * multiplier) / BigInt(1e6) - bigAmount, 18);
+
+                return (
+                  <div
+                    key={virtualRow.index}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: `${virtualRow.size}px`,
+                      transform: `translateY(${virtualRow.start}px)`,
+                    }}
+                    className={cn(
+                      'border-foreground/10 z-10 flex w-full items-center gap-5 rounded border bg-[#4BAEB51A] px-2 text-xs backdrop-blur-lg',
+                      number && state.start && number > state.start && crashed && 'bg-red-500/20',
+                      number &&
+                        state.start &&
+                        number > state.start &&
+                        !crashed &&
+                        'bg-green-500/20',
+                      bet.cancelled && 'bg-muted text-muted-foreground line-through opacity-50'
+                    )}
+                  >
+                    <span className="grow">{formatUnits(bigAmount, 18)}</span>
+                    <span className="w-20 flex-none">
+                      <MultiplierBadge
+                        multiplier={multiplier}
+                        variant={bet.cancelled ? 'outline' : undefined}
+                      />
+                    </span>
+
+                    <span
                       className={cn(
-                        'text-xs',
-                        number && state.start && number > state.start && crashed && 'bg-red-500/20',
-                        number &&
-                          state.start &&
-                          number > state.start &&
-                          !crashed &&
-                          'bg-green-500/20',
-                        bet.cancelled && 'bg-muted text-muted-foreground line-through opacity-50'
+                        'grow',
+                        crashed ? 'text-red-500' : 'text-green-500',
+                        bet.cancelled && 'text-muted-foreground line-through'
                       )}
                     >
-                      <TableCell>{formatUnits(bigAmount, 18)}</TableCell>
-                      <TableCell>
-                        <MultiplierBadge
-                          multiplier={multiplier}
-                          variant={bet.cancelled ? 'outline' : undefined}
-                        />
-                      </TableCell>
+                      {profit}
+                    </span>
 
-                      <TableCell
-                        className={cn(
-                          crashed ? 'text-red-500' : 'text-green-500',
-                          bet.cancelled && 'text-muted-foreground line-through'
-                        )}
-                      >
-                        {profit}
-                      </TableCell>
-                      <TableCell>
-                        {!bet.cancelled && number && state.start && number > state.start ? (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-min w-min p-0 text-xs"
-                            onClick={handleCashout.bind(null, bet.index)}
-                            disabled={
-                              isPending ||
-                              crashed ||
-                              bet.cancelled ||
-                              number > state.start + bet.cashoutIndex
-                            }
-                          >
-                            Cash out
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-min w-min p-0 text-xs"
-                            onClick={handleCancel.bind(null, bet.index)}
-                            disabled={isPending || bet.cancelled}
-                          >
-                            Cancel
-                          </Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-                {myBets.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-muted-foreground text-center">
-                      You have no bets placed
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-
-        {!myBets.length && (
-          <p className="text-muted-foreground text-xs">
-            Your bets will be displayed here after placing them
-          </p>
-        )}
-
-        <div className="mt-auto">
+                    <span className="w-16 flex-none">
+                      {!bet.cancelled && number && state.start && number > state.start ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-min w-min p-0 text-xs"
+                          onClick={handleCashout.bind(null, bet.index)}
+                          disabled={
+                            isPending ||
+                            crashed ||
+                            bet.cancelled ||
+                            number > state.start + bet.cashoutIndex
+                          }
+                        >
+                          Cash out
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-min w-min p-0 text-xs"
+                          onClick={handleCancel.bind(null, bet.index)}
+                          disabled={isPending || bet.cancelled}
+                        >
+                          Cancel
+                        </Button>
+                      )}
+                    </span>
+                  </div>
+                );
+              })
+            : null}
+          {myBets.length === 0 && (
+            <div className="text-muted-foreground z-10 flex h-10 w-full items-center justify-center rounded border bg-[#4BAEB51A] text-center text-xs backdrop-blur-lg">
+              You have no bets
+            </div>
+          )}
           <Image
             src="https://grind.bearish.af/GrindMath01.gif"
             alt="Grind Math"
             width={540}
             height={540}
+            className="absolute bottom-0 left-1/2 -z-50 size-32 -translate-x-1/2"
             unoptimized
-            className="-mt-32 size-32"
           />
         </div>
       </div>

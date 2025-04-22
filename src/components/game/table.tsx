@@ -1,13 +1,5 @@
 'use client';
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import Image from 'next/image';
 import { useGame } from '../providers/game';
 import { multipliers, stillAlive, stillGrinding } from '@/lib/block-crash';
@@ -15,6 +7,8 @@ import { cn, shorthandHex } from '@/lib/utils';
 import { useBlock } from '../providers/block';
 import { formatUnits } from 'viem';
 import { MultiplierBadge } from './multiplier';
+import { useRef } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 
 interface GameTableProps {
   className?: string;
@@ -23,6 +17,18 @@ interface GameTableProps {
 export const GameTable: React.FC<GameTableProps> = ({ className }) => {
   const { number } = useBlock();
   const { state } = useGame();
+  const parentRef = useRef(null);
+  const bets = state?.bets.filter(bet => !bet.cancelled) ?? [];
+
+  const virtualizer = useVirtualizer({
+    count: bets.length ?? 0,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 56,
+    gap: 8,
+    paddingStart: 24,
+    paddingEnd: 16,
+    overscan: 5,
+  });
 
   return (
     <div className={cn('flex w-full flex-none flex-col gap-4 xl:w-sm', className)}>
@@ -56,83 +62,84 @@ export const GameTable: React.FC<GameTableProps> = ({ className }) => {
       </div>
 
       <div
+        ref={parentRef}
         className={cn(
           'bg-muted/20 scrollbar-hidden flex min-h-64 grow flex-col items-center overflow-y-auto rounded border p-4 pb-0 backdrop-blur-md'
         )}
       >
-        <div className="w-full">
-          <Table className="border-separate border-spacing-y-2">
-            <TableHeader>
-              <TableRow className="bg-transparent text-[10px] backdrop-blur-none *:data-[slot=table-head]:h-6 sm:text-xs">
-                <TableHead>User</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Multiplier</TableHead>
-                <TableHead>Profit</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {state?.bets
-                .filter(bet => !bet.cancelled)
-                .map((bet, i) => {
-                  const crashed = !stillAlive(bet, state);
-                  const bigAmount = BigInt(bet.amount);
-                  const multiplier = multipliers[bet.cashoutIndex];
-                  const profit = formatUnits(
-                    (bigAmount * multiplier) / BigInt(1e6) - bigAmount,
-                    18
-                  );
-                  return (
-                    <TableRow
-                      key={i}
+        <div
+          className="relative isolate w-full flex-none grow overflow-visible"
+          style={{ height: `${virtualizer.getTotalSize()}px` }}
+        >
+          <div className="mb-2 flex items-center gap-5 px-2 text-xs">
+            <span className="w-24">User</span>
+            <span className="grow">Amount</span>
+            <span className="w-20">Multiplier</span>
+            <span className="grow">Profit</span>
+          </div>
+          {state
+            ? virtualizer.getVirtualItems().map(virtualRow => {
+                const bet = bets[virtualRow.index];
+                const crashed = !stillAlive(bet, state);
+                const bigAmount = BigInt(bet.amount);
+                const multiplier = multipliers[bet.cashoutIndex];
+                const profit = formatUnits((bigAmount * multiplier) / BigInt(1e6) - bigAmount, 18);
+
+                return (
+                  <div
+                    key={virtualRow.index}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: `${virtualRow.size}px`,
+                      transform: `translateY(${virtualRow.start}px)`,
+                    }}
+                    className={cn(
+                      'border-foreground/10 z-10 flex w-full items-center gap-5 rounded border bg-[#4BAEB51A] px-2 text-xs backdrop-blur-lg',
+                      number && state.start && number > state.start && crashed && 'bg-red-500/20',
+                      number &&
+                        state.start &&
+                        number > state.start &&
+                        !crashed &&
+                        'bg-green-500/20',
+                      bet.cancelled && 'bg-muted text-muted-foreground line-through opacity-50'
+                    )}
+                  >
+                    <span className="w-24">{shorthandHex(bet.user)}</span>
+                    <span className="grow">{formatUnits(bigAmount, 18)}</span>
+                    <span className="w-20">
+                      <MultiplierBadge
+                        multiplier={multiplier}
+                        variant={bet.cancelled ? 'outline' : undefined}
+                      />
+                    </span>
+
+                    <span
                       className={cn(
-                        'text-xs',
-                        number && state.start && number > state.start && crashed && 'bg-red-500/20',
-                        number &&
-                          state.start &&
-                          number > state.start &&
-                          !crashed &&
-                          'bg-green-500/20',
-                        bet.cancelled && 'bg-muted text-muted-foreground line-through opacity-50'
+                        'grow',
+                        crashed ? 'text-red-500' : 'text-green-500',
+                        bet.cancelled && 'text-muted-foreground line-through'
                       )}
                     >
-                      <TableCell>{shorthandHex(bet.user)}</TableCell>
-                      <TableCell>{formatUnits(bigAmount, 18)}</TableCell>
-                      <TableCell>
-                        <MultiplierBadge
-                          multiplier={multiplier}
-                          variant={bet.cancelled ? 'outline' : undefined}
-                        />
-                      </TableCell>
-
-                      <TableCell
-                        className={cn(
-                          crashed ? 'text-red-500' : 'text-green-500',
-                          bet.cancelled && 'text-muted-foreground line-through'
-                        )}
-                      >
-                        {profit}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              {state?.bets.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-muted-foreground text-center">
-                    No bets placed yet
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-
-        <div className="mt-auto">
+                      {profit}
+                    </span>
+                  </div>
+                );
+              })
+            : null}
+          {state?.bets.length === 0 && (
+            <div className="text-muted-foreground z-10 flex h-10 w-full items-center justify-center rounded border bg-[#4BAEB51A] text-center text-xs backdrop-blur-lg">
+              No bets placed yet
+            </div>
+          )}
           <Image
             src="https://grind.bearish.af/vibinghamster.gif"
             width={540}
             height={540}
             alt="vibinghamster"
-            className="-mt-40 size-40"
+            className="absolute bottom-0 left-1/2 -z-50 size-40 -translate-x-1/2"
             unoptimized
           />
         </div>
