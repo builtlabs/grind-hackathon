@@ -170,6 +170,17 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
     sendTransaction({ transaction, onSuccess: grind.refetch });
   }
 
+  function handleBalanceClicked(event: React.MouseEvent<HTMLButtonElement>) {
+    if (!grind.data) return;
+
+    const input = event.currentTarget
+      .closest('form')
+      ?.querySelector('input[name="amount"]') as HTMLInputElement;
+    if (input) {
+      input.value = grind.data?.formatted;
+    }
+  }
+
   useEffect(() => {
     if (!state || !number) return;
 
@@ -219,19 +230,15 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
                 Bet Amount
               </Label>
 
-              <span className="text-sm text-gray-500">
-                {grind.data?.formatted} {grind.data?.symbol}
-              </span>
+              <button
+                type="button"
+                className="text-muted-foreground cursor-pointer text-xs hover:underline"
+                onClick={handleBalanceClicked}
+              >
+                {grind.data?.rounded} {grind.data?.symbol}
+              </button>
             </div>
-            <Input
-              id="amount"
-              name="amount"
-              type="number"
-              placeholder="0.00"
-              className="w-full"
-              min={0}
-              step={0.01}
-            />
+            <Input id="amount" name="amount" type="text" placeholder="0.00" className="w-full" />
             <Mint onSuccess={grind.refetch} disabled={grind.data && grind.data?.value >= 500} />
           </div>
 

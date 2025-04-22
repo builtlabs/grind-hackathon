@@ -415,7 +415,7 @@ export const ManageLiquidity: React.FC = () => {
 
                 <button
                   type="button"
-                  className="text-muted-foreground cursor-pointer text-sm hover:underline"
+                  className="text-muted-foreground cursor-pointer text-xs hover:underline"
                   onClick={handleBalanceClicked}
                 >
                   {data?.balance.rounded} {data?.balance.symbol}
@@ -434,7 +434,7 @@ export const ManageLiquidity: React.FC = () => {
 
                 <button
                   type="button"
-                  className="text-muted-foreground cursor-pointer text-sm hover:underline"
+                  className="text-muted-foreground cursor-pointer text-xs hover:underline"
                   onClick={handleSharesClicked}
                 >
                   {data?.shares.rounded} {data?.shares.symbol}

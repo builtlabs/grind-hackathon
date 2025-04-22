@@ -4,6 +4,7 @@ import { useAbstractClient } from '@abstract-foundation/agw-react';
 import { Address, formatUnits } from 'viem';
 import { abstractTestnet } from 'viem/chains';
 import { useReadContracts } from 'wagmi';
+import { formatNumber } from '@/lib/utils';
 
 export function useGrindBalance(options?: { enabled?: boolean }) {
   const { data: client } = useAbstractClient();
@@ -41,6 +42,7 @@ export function useGrindBalance(options?: { enabled?: boolean }) {
 
         return {
           formatted,
+          rounded: formatNumber(Number(formatted)),
           value: Number(formatted),
           raw: data[0],
           decimals: data[1],
