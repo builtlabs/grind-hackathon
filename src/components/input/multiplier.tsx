@@ -16,7 +16,7 @@ export const MultiplierInput: React.FC = () => {
       <SelectContent>
         {multipliers.map((multiplier, index) => (
           <SelectItem key={multiplier} value={index.toString()}>
-            {formatMultiplier(multiplier)}x
+            Block {index + 1} ({formatMultiplier(multiplier)}x)
           </SelectItem>
         ))}
       </SelectContent>
