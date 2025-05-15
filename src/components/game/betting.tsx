@@ -18,10 +18,9 @@ import {
 } from 'viem';
 import { abi, addresses } from '@/contracts/block-crash';
 import { abi as grindAbi, addresses as grindAddresses } from '@/contracts/grind';
-import { multipliers, stateCountdown, stillAlive } from '@/lib/block-crash';
+import { multipliers, stillAlive } from '@/lib/block-crash';
 import { useGame } from '../providers/game';
 import { toast } from 'sonner';
-import { useBlock } from '../providers/block';
 import { cn, formatNumber } from '@/lib/utils';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
@@ -38,12 +37,7 @@ interface BettingProps {
 
 export const Betting: React.FC<BettingProps> = ({ className }) => {
   const parentRef = useRef(null);
-  const { number } = useBlock();
   const { state, oldState } = useGame();
-  const countdown = useMemo(
-    () => (number && state ? stateCountdown(number, state) : null),
-    [number, state]
-  );
   const { data: client } = useAbstractClient();
   const myBets = useMemo(() => {
     if (!state || !client) return [];
@@ -182,12 +176,12 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
   }
 
   useEffect(() => {
-    if (!state || !number) return;
+    if (!state) return;
 
-    if (state.end === number - 1) {
+    if (state.end === state.current - 1) {
       // Game Crashed
       setEnded(true);
-    } else if (!state.end && state.start + multipliers.length - 1 === number) {
+    } else if (!state.end && state.start + multipliers.length - 1 === state.current) {
       // Game reached 100x
       setEnded(true);
     } else if (ended && oldState) {
@@ -195,39 +189,18 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
       grind.refetch();
       setEnded(false);
     }
-  }, [ended, grind, number, oldState, state]);
+  }, [ended, grind, oldState, state]);
 
   return (
     <div className={cn('flex w-full flex-none flex-col gap-5 xl:w-[340px]', className)}>
       <div className="bg-muted/20 flex h-min flex-col items-center rounded border p-4 backdrop-blur-md">
-        <h2 className="text-xl font-bold">Place a Bet</h2>
-
-        <h3 className="text-muted-foreground text-xs">
-          {!countdown && 'Place a bet to start the game'}
-          {countdown?.type === 'starting' ? (
-            <>
-              Round Starting in <strong>{countdown.countdown}</strong> blocks ({countdown.target})
-            </>
-          ) : null}
-
-          {countdown?.type === 'ending' ? (
-            <>
-              Round Ending in <strong>{countdown.countdown}</strong> blocks ({countdown.target})
-            </>
-          ) : null}
-
-          {countdown?.type === 'ended' ? (
-            <>
-              Round ended at block <strong>{countdown.target}</strong>
-            </>
-          ) : null}
-        </h3>
+        <h2 className="text-xl font-bold">Betting</h2>
 
         <form className="flex w-full flex-col gap-4" onSubmit={handleSubmit}>
           <div className="flex flex-col">
             <div className="flex items-center justify-between">
               <Label htmlFor="amount" className="mb-1">
-                Bet Amount
+                Amount
               </Label>
 
               <button
@@ -254,7 +227,8 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
               className="mt-4 w-full"
               type="submit"
               disabled={
-                isPending || (!oldState && state?.start && number ? state?.start <= number : false)
+                isPending ||
+                (!oldState && state?.start && state.current ? state?.start <= state.current : false)
               }
             >
               Place Bet
@@ -310,12 +284,8 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
                     }}
                     className={cn(
                       'border-foreground/10 z-10 flex w-full items-center gap-5 rounded border bg-[#4BAEB51A] px-2 text-xs backdrop-blur-lg',
-                      number && state.start && number > state.start && crashed && 'bg-red-500/20',
-                      number &&
-                        state.start &&
-                        number > state.start &&
-                        !crashed &&
-                        'bg-green-500/20',
+                      state.start && state.current > state.start && crashed && 'bg-red-500/20',
+                      state.start && state.current > state.start && !crashed && 'bg-green-500/20',
                       bet.cancelled && 'bg-muted text-muted-foreground line-through opacity-50'
                     )}
                   >
@@ -338,7 +308,7 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
                     </span>
 
                     <span className="w-16 flex-none">
-                      {!bet.cancelled && number && state.start && number > state.start ? (
+                      {!bet.cancelled && state.start && state.current > state.start ? (
                         <Button
                           variant="ghost"
                           size="sm"
@@ -348,7 +318,7 @@ export const Betting: React.FC<BettingProps> = ({ className }) => {
                             isPending ||
                             crashed ||
                             bet.cancelled ||
-                            number > state.start + bet.cashoutIndex
+                            state.current > state.start + bet.cashoutIndex
                           }
                         >
                           Cash out

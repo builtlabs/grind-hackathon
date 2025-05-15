@@ -4,7 +4,6 @@ import Image from 'next/image';
 import { useGame } from '../providers/game';
 import { multipliers, stillAlive, stillGrinding } from '@/lib/block-crash';
 import { cn, formatNumber, shorthandHex } from '@/lib/utils';
-import { useBlock } from '../providers/block';
 import { formatUnits } from 'viem';
 import { MultiplierBadge } from './multiplier';
 import { useRef } from 'react';
@@ -15,7 +14,6 @@ interface GameTableProps {
 }
 
 export const GameTable: React.FC<GameTableProps> = ({ className }) => {
-  const { number } = useBlock();
   const { state } = useGame();
   const parentRef = useRef(null);
   const bets = state?.bets.filter(bet => !bet.cancelled) ?? [];
@@ -63,7 +61,7 @@ export const GameTable: React.FC<GameTableProps> = ({ className }) => {
         <div className="flex flex-col">
           <span className="text-muted-foreground text-xs">Still Grinding</span>
           <span className="text-sm font-medium">
-            {state?.bets.filter(bet => stillGrinding(bet, state, number)).length}
+            {state?.bets.filter(bet => stillGrinding(bet, state)).length}
           </span>
         </div>
       </div>
@@ -107,12 +105,8 @@ export const GameTable: React.FC<GameTableProps> = ({ className }) => {
                     }}
                     className={cn(
                       'border-foreground/10 z-10 flex w-full items-center gap-5 rounded border bg-[#4BAEB51A] px-2 text-xs backdrop-blur-lg',
-                      number && state.start && number > state.start && crashed && 'bg-red-500/20',
-                      number &&
-                        state.start &&
-                        number > state.start &&
-                        !crashed &&
-                        'bg-green-500/20',
+                      state.start && state.current > state.start && crashed && 'bg-red-500/20',
+                      state.start && state.current > state.start && !crashed && 'bg-green-500/20',
                       bet.cancelled && 'bg-muted text-muted-foreground line-through opacity-50'
                     )}
                   >

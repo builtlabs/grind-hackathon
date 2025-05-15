@@ -2,7 +2,6 @@
 
 import React, { useRef, useEffect } from 'react';
 import { useGame } from './providers/game';
-import { useBlock } from './providers/block';
 import { multipliers } from '@/lib/block-crash';
 
 interface RenderState {
@@ -33,17 +32,16 @@ const MatrixRainBackground: React.FC = () => {
     mode: 'idle',
     progress: 0,
   });
-  const { number } = useBlock();
   const { state } = useGame();
 
   useEffect(() => {
-    if (!state || !number) return;
+    if (!state) return;
 
     if (
       renderState.current.mode === 'running' &&
       !renderState.current.crashed &&
       state.end &&
-      state.end < number
+      state.end < state.current
     ) {
       renderState.current.crashed = performance.now();
       renderState.current.mode = 'idle';
@@ -52,7 +50,7 @@ const MatrixRainBackground: React.FC = () => {
     if (
       renderState.current.mode === 'running' &&
       state.start &&
-      state.start + multipliers.length - 1 <= number
+      state.start + multipliers.length - 1 <= state.current
     ) {
       renderState.current.mode = 'idle';
     }
@@ -61,12 +59,12 @@ const MatrixRainBackground: React.FC = () => {
       renderState.current.mode === 'idle' &&
       state.start &&
       !state.end &&
-      state.start <= number &&
-      state.start + multipliers.length >= number
+      state.start <= state.current &&
+      state.start + multipliers.length >= state.current
     ) {
       renderState.current.mode = 'running';
     }
-  }, [state, number]);
+  }, [state]);
 
   useEffect(() => {
     const canvas = canvasRef.current;

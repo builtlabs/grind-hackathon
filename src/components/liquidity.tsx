@@ -29,13 +29,11 @@ import { toast } from 'sonner';
 import { useSendTransaction } from '@/hooks/use-send-transaction';
 import { formatNumber } from '@/lib/utils';
 import { useGame } from './providers/game';
-import { useBlock } from './providers/block';
 import { multipliers } from '@/lib/block-crash';
 import { Wrench } from 'lucide-react';
 
 export const ManageLiquidity: React.FC = () => {
   const [open, setOpen] = useState(false);
-  const { number } = useBlock();
   const { state, oldState } = useGame();
   const { data: client } = useAbstractClient();
   const { sendTransaction, isPending } = useSendTransaction({
@@ -308,12 +306,12 @@ export const ManageLiquidity: React.FC = () => {
   }
 
   useEffect(() => {
-    if (!state || !number) return;
+    if (!state) return;
 
-    if (state.end === number - 1) {
+    if (state.end === state.current - 1) {
       // Game Crashed
       setEnded(true);
-    } else if (!state.end && state.start + multipliers.length - 1 === number) {
+    } else if (!state.end && state.start + multipliers.length - 1 === state.current) {
       // Game reached 100x
       setEnded(true);
     } else if (ended && oldState) {
@@ -321,7 +319,7 @@ export const ManageLiquidity: React.FC = () => {
       refetch();
       setEnded(false);
     }
-  }, [ended, number, oldState, refetch, state]);
+  }, [ended, oldState, refetch, state]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

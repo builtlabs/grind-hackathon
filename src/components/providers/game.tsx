@@ -21,7 +21,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     queryKey: ['contract-state', lastEnd],
     queryFn: async ({ signal }) =>
       fetcher<ContractState>(`/api/game?blockNumber=${lastEnd}`, { signal }),
-    enabled: !!number && !!lastEnd && lastEnd < number,
+    enabled: !!number && !!lastEnd && lastEnd <= number,
   });
 
   const game = useQuery<ContractState>({
@@ -48,9 +48,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return {
       state: oldState
         ? {
-            ...previous.data,
-            history: game.data.history,
+            current: game.data.current,
+            start: previous.data.start,
+            end: previous.data.end,
             liquidity: game.data.liquidity,
+            history: game.data.history,
+            bets: previous.data.bets,
           }
         : game.data,
       oldState: oldState,

@@ -61,37 +61,36 @@ export interface BlockInfo {
 }
 
 export function createBlock(
-  number: number,
   state?: Omit<ContractState, 'liquidity' | 'history' | 'bets'>
 ): BlockInfo {
   if (!state) {
     return {
-      number,
+      number: 0,
       multiplier: 0n,
       result: 'none',
     };
   }
 
-  if (state.end && number === state.end) {
+  if (state.end && state.current === state.end) {
     return {
-      number,
-      multiplier: multipliers[number - state.start],
+      number: state.current,
+      multiplier: multipliers[state.current - state.start],
       result: 'crash',
     };
   }
 
   const end = state.end || state.start + multipliers.length - 1;
 
-  if (state.start <= number && number <= end) {
+  if (state.start <= state.current && state.current <= end) {
     return {
-      number,
-      multiplier: multipliers[number - state.start],
+      number: state.current,
+      multiplier: multipliers[state.current - state.start],
       result: 'ok',
     };
   }
 
   return {
-    number,
+    number: state.current,
     multiplier: 0n,
     result: 'none',
   };
@@ -101,29 +100,26 @@ export function formatMultiplier(multiplier: bigint): string {
   return formatUnits(multiplier, 6);
 }
 
-export function stateCountdown(
-  number: number,
-  state: Omit<ContractState, 'liquidity' | 'history' | 'bets'>
-) {
-  if (state.start && number && state.start > number) {
+export function stateCountdown(state: Omit<ContractState, 'liquidity' | 'history' | 'bets'>) {
+  if (state.start && state.current && state.start > state.current) {
     return {
       type: 'starting',
-      countdown: state.start - number,
+      countdown: state.start - state.current,
       target: state.start,
     } as const;
   }
 
   const end = state.end || state.start + multipliers.length - 1;
 
-  if (state.start && number && state.start <= number && number < end) {
+  if (state.start && state.current && state.start <= state.current && state.current < end) {
     return {
       type: 'ending',
-      countdown: state.start + multipliers.length - number,
+      countdown: state.start + multipliers.length - state.current,
       target: state.start + multipliers.length - 1,
     } as const;
   }
 
-  if (end === number) {
+  if (state.start && end && end <= state.current) {
     return {
       type: 'ended',
       countdown: 0,
@@ -143,10 +139,7 @@ export function stillAlive(
 
 export function stillGrinding(
   bet: { cashoutIndex: number; cancelled: boolean },
-  state: { start: number; end?: number },
-  blockNumber?: number
+  state: { start: number; current: number; end?: number }
 ): boolean {
-  return (
-    !!blockNumber && !state.end && state.start + bet.cashoutIndex >= blockNumber && !bet.cancelled
-  );
+  return !state.end && state.start + bet.cashoutIndex >= state.current && !bet.cancelled;
 }
