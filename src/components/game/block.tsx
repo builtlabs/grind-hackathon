@@ -3,10 +3,11 @@
 import { useGame } from '../providers/game';
 import { useBlock } from '../providers/block';
 import { useEffect, useState } from 'react';
-import { BlockInfo, createBlock, formatMultiplier } from '@/lib/block-crash';
+import { BlockInfo, createBlock, formatMultiplier, multipliers } from '@/lib/block-crash';
 import Image from 'next/image';
 import { MultiplierBadge } from './multiplier';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export const GameBlock: React.FC = () => {
   const { number } = useBlock();
@@ -48,9 +49,18 @@ export const GameBlock: React.FC = () => {
       <div className="flex w-full flex-col gap-2">
         <p className="text-muted-foreground text-xs">Multiplier History</p>
         <div className="bg-muted/20 flex h-10 items-center justify-between gap-3 overflow-hidden rounded border p-2 backdrop-blur-md">
-          {state?.history.map((result, index) => (
-            <MultiplierBadge key={index} multiplier={BigInt(result)} />
-          ))}
+          <TooltipProvider>
+            {state?.history.map((result, index) => (
+              <Tooltip key={index}>
+                <TooltipTrigger>
+                  <MultiplierBadge multiplier={BigInt(result)} />
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  Block {multipliers.indexOf(BigInt(result) as (typeof multipliers)[number]) + 1}
+                </TooltipContent>
+              </Tooltip>
+            ))}
+          </TooltipProvider>
         </div>
       </div>
 
