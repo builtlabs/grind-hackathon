@@ -9,6 +9,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { AbstractWalletWrapper } from '@/components/providers/abstract';
 import MatrixRainBackground from '@/components/background';
 import { GameProvider } from '@/components/providers/game';
+import { ReactScan } from '@/components/scan';
 
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
@@ -45,6 +46,7 @@ export default async function RootLayout({
           <Footer />
         </AbstractWalletWrapper>
         <Toaster />
+        <ReactScan />
       </body>
     </html>
   );
