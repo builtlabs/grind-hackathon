@@ -20,7 +20,22 @@ export const BlockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   useEffect(() => {
     function handleBlock(block: number) {
-      setBlock(block);
+      setBlock(current => {
+        if (current && block < current) {
+          if (env.NEXT_PUBLIC_VERCEL_ENV === 'development') {
+            console.warn(`❌ Websocket Received old block: ${current} -> ${block}`);
+          }
+          return current;
+        }
+
+        if (current && current + 1 !== block) {
+          if (env.NEXT_PUBLIC_VERCEL_ENV === 'development') {
+            console.warn(`⚠️ Websocket Received skipped block: ${current} -> ${block}`);
+          }
+        }
+
+        return block;
+      });
     }
 
     if (typeof window === 'undefined') return;
