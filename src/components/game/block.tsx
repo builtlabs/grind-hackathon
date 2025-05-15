@@ -1,45 +1,66 @@
 'use client';
 
 import { useGame } from '../providers/game';
-import { useBlock } from '../providers/block';
-import { useEffect, useState } from 'react';
-import { BlockInfo, createBlock, formatMultiplier, multipliers } from '@/lib/block-crash';
+import {
+  BlockInfo,
+  createBlock,
+  formatMultiplier,
+  multipliers,
+  stateCountdown,
+} from '@/lib/block-crash';
 import Image from 'next/image';
 import { MultiplierBadge } from './multiplier';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export const GameBlock: React.FC = () => {
-  const { number } = useBlock();
-  const [blocks, setBlocks] = useState<BlockInfo[]>([]);
   const { state } = useGame();
-
-  useEffect(() => {
-    if (!number) {
-      return;
-    }
-
-    setBlocks(() => {
-      const newBlocks: BlockInfo[] = [];
-
-      for (let i = 0; i < 5; i++) {
-        const blockNumber = number + i - 3;
-        newBlocks.push(createBlock(blockNumber, state));
-      }
-
-      return newBlocks;
-    });
-  }, [number, state]);
+  const countdown = state ? stateCountdown(state) : null;
+  const blocks = state
+    ? Array.from({ length: 5 }, (_, index) =>
+        createBlock({
+          ...state,
+          current: state.current - 3 + index,
+        })
+      )
+    : [];
 
   return (
     <div className="flex flex-col items-center justify-between gap-5">
       <div className="flex h-28 flex-col items-center">
-        <p className="text-base">Current Multiplier</p>
-        <p className="text-7xl font-bold">
-          {blocks[2]?.result === 'none' && '--'}
-          {blocks[2]?.result === 'ok' && `${formatMultiplier(blocks[2].multiplier)}x`}
-          {blocks[2]?.result === 'crash' && <span className="text-[#941818]">CRASH</span>}
-        </p>
+        {countdown?.type === 'starting' ? (
+          <>
+            <p className="text-base">Round Starting In</p>
+            <p className="text-7xl font-bold">{countdown.countdown}</p>
+          </>
+        ) : null}
+
+        {countdown?.type === 'ending' ? (
+          <>
+            <p className="text-base">Current Multiplier</p>
+            <p className="text-7xl font-bold">
+              {blocks[2]?.result === 'none' && '0x'}
+              {blocks[2]?.result === 'ok' && `${formatMultiplier(blocks[2].multiplier)}x`}
+              {blocks[2]?.result === 'crash' && <span className="text-[#941818]">CRASH</span>}
+            </p>
+          </>
+        ) : null}
+
+        {state && countdown?.type === 'ended' ? (
+          <>
+            <p className="text-base">Round Ended</p>
+            <p className="text-7xl font-bold">
+              {formatMultiplier(multipliers[countdown.target - state.start - 1])}x
+            </p>
+          </>
+        ) : null}
+
+        {!countdown ? (
+          <>
+            <p className="text-base">Waiting For Next Round</p>
+            <p className="text-7xl font-bold">--</p>
+          </>
+        ) : null}
       </div>
       <div className="relative isolate mx-16 flex size-40 items-center lg:mx-28 lg:size-64">
         {blocks.map((block, index) => (
@@ -64,7 +85,7 @@ export const GameBlock: React.FC = () => {
         </div>
       </div>
 
-      {number && state?.start && !state?.end && number - state.start > 11 ? (
+      {state?.start && !state.end && state.current - state.start > 11 ? (
         <Image
           src="https://grind.bearish.af/grindjetpack.gif"
           width={540}
