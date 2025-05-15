@@ -28,7 +28,12 @@ export const AuthButton: React.FC<{
     }
 
     return (
-      <Button className={cn('md:w-44', className)} onClick={handleLogout} type="button">
+      <Button
+        variant="outline"
+        className={cn('md:w-44', className)}
+        onClick={handleLogout}
+        type="button"
+      >
         Disconnect
       </Button>
     );

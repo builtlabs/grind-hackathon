@@ -2,7 +2,6 @@
 
 import {
   AlertDialog,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -15,7 +14,7 @@ import { cn } from '@/lib/utils';
 import { AuthButton } from './auth/button';
 import { Button } from './ui/button';
 import { Zap } from 'lucide-react';
-import { useAbstractClient } from '@abstract-foundation/agw-react';
+import { useAbstractClient, useGlobalWalletSignerAccount } from '@abstract-foundation/agw-react';
 import { encodeFunctionData } from 'viem';
 import { useGrindBalance } from '@/hooks/use-grind-balance';
 import { useSendTransaction } from '@/hooks/use-send-transaction';
@@ -82,6 +81,7 @@ export const IntroDialog: React.FC = () => {
     setValue: setSeenIntro,
     isPending: seenIntroIsPending,
   } = useLocalStorage('builtlabs.hashcrash.intro', false);
+  const { status } = useGlobalWalletSignerAccount();
   const { data: client } = useAbstractClient();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
@@ -193,10 +193,6 @@ export const IntroDialog: React.FC = () => {
               />
               HashCrash
             </AlertDialogTitle>
-
-            <AlertDialogCancel onClick={() => setStep(0)}>
-              Skip <span className="hidden sm:inline-block">Tutorial</span>
-            </AlertDialogCancel>
           </div>
           <AlertDialogDescription className="text-start text-xs">
             This is a simple guide to help you get started with HashCrash. You can skip this guide
@@ -233,7 +229,7 @@ export const IntroDialog: React.FC = () => {
             onClick={() => {
               setStep(2);
             }}
-            disabled={!client}
+            disabled={status !== 'connected'}
           />
           <Stage
             current={step}
@@ -243,7 +239,7 @@ export const IntroDialog: React.FC = () => {
             onClick={() => {
               setStep(3);
             }}
-            disabled={!client}
+            disabled={status !== 'connected'}
           />
         </div>
 
@@ -266,7 +262,7 @@ export const IntroDialog: React.FC = () => {
               </p>
 
               <AlertDialogFooter className="mt-auto">
-                <Button variant="outline" onClick={() => setStep(1)}>
+                <Button className="md:w-44" variant="outline" onClick={() => setStep(1)}>
                   Skip Install
                 </Button>
               </AlertDialogFooter>
@@ -282,6 +278,11 @@ export const IntroDialog: React.FC = () => {
 
               <AlertDialogFooter className="mt-auto">
                 <AuthButton authOnly />
+                {status === 'connected' && (
+                  <Button className="md:w-44" onClick={() => setStep(2)}>
+                    Continue
+                  </Button>
+                )}
               </AlertDialogFooter>
             </div>
 
@@ -306,13 +307,45 @@ export const IntroDialog: React.FC = () => {
               </p>
 
               <AlertDialogFooter className="mt-auto">
-                <Button variant="outline" onClick={() => setStep(3)}>
-                  Skip Turbo Mode
-                </Button>
-                <Button onClick={handleTurboMode} disabled={sessionKeyIsPending}>
-                  <Zap className={cn(session && 'fill-current')} />
-                  {session ? 'disable turbo mode' : 'enable turbo mode'}
-                </Button>
+                {!session ? (
+                  <>
+                    <Button
+                      variant="outline"
+                      onClick={() => setStep(3)}
+                      disabled={sessionKeyIsPending}
+                      className="md:w-44"
+                    >
+                      Skip Turbo
+                    </Button>
+                    <Button
+                      className="md:w-44"
+                      onClick={handleTurboMode}
+                      disabled={sessionKeyIsPending}
+                    >
+                      <Zap />
+                      Enable Turbo
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      variant="outline"
+                      className="md:w-44"
+                      onClick={handleTurboMode}
+                      disabled={sessionKeyIsPending}
+                    >
+                      <Zap className="fill-current" />
+                      Disable Turbo
+                    </Button>
+                    <Button
+                      className="md:w-44"
+                      onClick={() => setStep(3)}
+                      disabled={sessionKeyIsPending}
+                    >
+                      Continue
+                    </Button>
+                  </>
+                )}
               </AlertDialogFooter>
             </div>
 
@@ -335,7 +368,19 @@ export const IntroDialog: React.FC = () => {
               </p>
 
               <AlertDialogFooter className="mt-auto">
-                <Button onClick={handleMint} disabled={isPending}>
+                {grind.isSuccess && grind.data.raw > 0 && (
+                  <Button
+                    variant="outline"
+                    className="md:w-44"
+                    onClick={() => {
+                      setStep(0);
+                      setOpen(false);
+                    }}
+                  >
+                    Skip Mint
+                  </Button>
+                )}
+                <Button className="md:w-44" onClick={handleMint} disabled={isPending}>
                   Mint $GRIND
                 </Button>
               </AlertDialogFooter>
